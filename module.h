@@ -1,0 +1,9 @@
+#ifndef MODULE_HEADER
+#define MODULE_HEADER
+
+Queue *CreateStringQueue(int size);
+void EnqueueString(Queue *q, char *string);
+char * DequeueString(Queue *q);
+void PrintQueueStats(Queue *q);
+
+#endif
