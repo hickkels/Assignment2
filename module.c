@@ -1,7 +1,10 @@
 #include "module.h"
 #include <stdio.h>
 
-
+int enqueueCount;
+int dequeueCount;
+wallclock enqueueTime
+wallclock dequeueTime;
 
 /*
 * Dynamically allocate a new Queue structure and initialize it with an array of character points of length size
