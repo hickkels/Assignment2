@@ -9,6 +9,9 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
  Return: int representing exit on success or failure
  */
  int main(int argC, char *argV[]) {
+  
+   // create a synchronization var for each queue
+   
  
    // first create three queues, will return a pointer to the queue
   
