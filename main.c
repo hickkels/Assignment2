@@ -14,6 +14,7 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
    
  
    // first create three queues, will return a pointer to the queue
+   // each will be size
   
    // then create 4 pthreads using pthread_create
    // each has its own id
