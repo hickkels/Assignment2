@@ -7,11 +7,13 @@ char * DequeueString(Queue *q);
 void PrintQueueStats(Queue *q);
 typedef struct Queue
 {
+    int sizeQueue;
+    int currSize;
     int enqueCount;
     int dequeue;
     time_t enqueueTime;
     time_t dequeueTime;
-    char *string;
+    char *strings;
 }Queue;
 
 #endif
