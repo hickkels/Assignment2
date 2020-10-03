@@ -11,7 +11,8 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
  int main(int argC, char *argV[]) {
  
    // first create three queues, will return a pointer to the queue
-  
+   Queue *Q = CreateStringQueue(10); 
+ 
    // then create 4 pthreads using pthread_create
    // each has its own id
    pthread_t Reader;
