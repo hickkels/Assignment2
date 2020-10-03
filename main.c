@@ -9,16 +9,21 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
  Return: int representing exit on success or failure
  */
  int main(int argC, char *argV[]) {
+  
+   // create a synchronization var for each queue
+   
  
-   // first create three queues, will return a pointer to the queue
+   // first create three queues, will return a pointer to the queu
    Queue *Q = CreateStringQueue(10); 
  
+   // each will be size
+  
    // then create 4 pthreads using pthread_create
    // each has its own id
    pthread_t Reader;
-   pthread_t Munch1; // use index!
-   pthread_t Munch2; // use islower and toupper!
-   pthread_t Writer; // when no more string to process, print # strings processed to stdout
+   pthread_t Munch1;
+   pthread_t Munch2;
+   pthread_t Writer;
   
    // thread Reader will read in each input line from stdin
    // must check that the input line does not exceed the size of your buffer
@@ -37,3 +42,20 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
   
    return 0;
  }
+
+void reader_function() {
+    
+}
+
+void munch1_function() {
+    // use index!
+}
+
+void munch2_function() {
+    // use islower and toupper!
+}
+
+void writer_function() {
+    // when no more string to process, print # strings processed to stdout
+}
+
