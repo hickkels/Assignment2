@@ -10,10 +10,10 @@ typedef struct Queue
     int sizeQueue;
     int currSize;
     int enqueCount;
-    int dequeue;
+    int dequeueCount;
     time_t enqueueTime;
     time_t dequeueTime;
-    char *strings;
-}Queue;
+    char **strings;
+} Queue;
 
 #endif

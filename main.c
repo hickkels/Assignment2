@@ -3,6 +3,9 @@ Cecelia Peterson: cpeterson36@wisc.edu, 9073157274
 Kelsey Hickok: khickok@wisc.edu, 9076435016
 */
 
+
+#include "module.h"
+
  /*
  The main function calls functions to print requested fields for given process ids
  Input: command line args
@@ -47,6 +50,9 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
    
     // wait for these threads to finish by calling pthread_join
     // each thread will call pthread_exit
+   // then create 4 pthreads using pthread_create
+   // wait for these threads to finish by calling pthread_join
+   // each thread will call pthread_exit
   
     // threads should terminate when there is no more input (end of file) TRICKY
    
