@@ -3,6 +3,9 @@ Cecelia Peterson: cpeterson36@wisc.edu, 9073157274
 Kelsey Hickok: khickok@wisc.edu, 9076435016
 */
 
+
+#include "module.h"
+
  /*
  The main function calls functions to print requested fields for given process ids
  Input: command line args
@@ -25,12 +28,6 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
    pthread_t Munch2;
    pthread_t Writer;
   
-   // thread Reader will read in each input line from stdin
-   // must check that the input line does not exceed the size of your buffer
-   // it it does: reject that line by 
-   // (1) printing out an error message to stderr and 
-   // (2) throw away (flush to end of line) any remaining characters on that line
-   
    // wait for these threads to finish by calling pthread_join
    // each thread will call pthread_exit
   
@@ -44,7 +41,11 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
  }
 
 void reader_function() {
-    
+     // thread Reader will read in each input line from stdin
+     // must check that the input line does not exceed the size of your buffer
+     // it it does: reject that line by
+     // (1) printing out an error message to stderr and
+     // (2) throw away (flush to end of line) any remaining characters on that line 
 }
 
 void munch1_function() {

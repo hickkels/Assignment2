@@ -12,7 +12,9 @@ wallclock dequeueTime;
 */
 Queue *CreateStringQueue(int size){
 
+     // malloc queue struct
 
+      
 
 }
 
@@ -21,9 +23,9 @@ Queue *CreateStringQueue(int size){
 * If the queue is full, then this function blocks until there is space available
 */
 void EnqueueString(Queue *q, char *string) {
-
-
-
+   
+    if (q->size == q->curr_size) //THE BLOCK until space availible
+    &(q->strings)[q->curr_size] = string;
 
 }
 
