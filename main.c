@@ -3,6 +3,8 @@ Cecelia Peterson: cpeterson36@wisc.edu, 9073157274
 Kelsey Hickok: khickok@wisc.edu, 9076435016
 */
 
+#define _GNU_SOURCE
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -14,7 +16,7 @@ struct mult_args {
     Queue *arg2;
 };
 
-void reader_function(Queue *reader_to_munch1) {
+void* reader_function(Queue *reader_to_munch1) {
     /* TODO:
     * pass each line to its own spot in the queue
     * change return
@@ -46,11 +48,11 @@ void reader_function(Queue *reader_to_munch1) {
             }
         }
         // increment line ??
-        EnqueueString(reader_to_munch1, line);
+        EnqueueString(reader_to_munch1, input);
     }
 }
 
-void munch1_function(Queue *reader_to_munch1, Queue *munch1_to_munch2) {
+void* munch1_function(Queue *reader_to_munch1, Queue *munch1_to_munch2) {
     // use strchr
     /* TODO:
     * change value to asterik (use correct memory addressing)
@@ -72,7 +74,7 @@ void munch1_function(Queue *reader_to_munch1, Queue *munch1_to_munch2) {
     EnqueueString(munch1_to_munch2, string);
 }
 
-void munch2_function(Queue *munch1_to_munch2, Queue *munch2_to_writer) {
+void* munch2_function(Queue *munch1_to_munch2, Queue *munch2_to_writer) {
     // use islower and toupper!
     /* TODO:
     * use correct memory addressing
@@ -91,7 +93,7 @@ void munch2_function(Queue *munch1_to_munch2, Queue *munch2_to_writer) {
     EnqueueString(munch2_to_writer, string);
 }
 
-void writer_function(Queue *munch2_to_writer) {
+void* writer_function(Queue *munch2_to_writer) {
     // when no more string to process, print # strings processed to stdout
 
 
