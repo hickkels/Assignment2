@@ -18,7 +18,16 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
  
     // first create three queues, will return a pointer to the queu
     Queue *Q = CreateStringQueue(10); 
- 
+    
+    /*read in input here or in Reader function?*/
+    char input; 
+    char *line = NULL;
+    
+    printf("Please enter 10 lines:\n");
+    for (int i=0; i<10; i++) {
+        input = getline(&line, &len, stdin);
+        
+    }
     // each will be size
   
     // then create 4 pthreads using pthread_create
@@ -63,7 +72,7 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
    return 0;
  }
 
-char* reader_function() {
+void reader_function() {
     /* TODO:
     * pass each line to its own spot in the queue
     * change return
@@ -71,70 +80,67 @@ char* reader_function() {
     char *buffer;
     size_t  buff_size = 1024;
     size_t characters;
-    buffer = (char *)malloc(bufsize * sizeof(char));
-    
-    if( buffer == NULL) {
-        fprintf(stderr, "Unable to allocate buffer.");
-        exit(1);
-    }
-    
-    characters = getline(&buffer, &buff_size, stdin);    
-
-    if (characters > n) {
-        fprintf(stderr, "Input line has exceeded buffer length.");
-        for (int i=buff_size; i<characters; i++) {
-            buffer[i] = '\0';
+    buffer = (char *)malloc(buff_size * sizeof(char));
+    while (Q.size > 0) {
+        if(buffer == NULL) {
+            fprintf(stderr, "Unable to allocate buffer.");
+            exit(1);
         }
+        characters = getline(&buffer, &buff_size, stdin);    
+
+        if (characters > n) {
+            fprintf(stderr, "Input line has exceeded buffer length.");
+            for (int i=buff_size; i<characters; i++) {
+                buffer[i] = '\0';
+            }
+        }
+        Q.EnqueueString(buffer);
     }
-    return buffer;
 }
 
-char* munch1_function(char* buffer) {
+void munch1_function() {
     // use strchr
     /* TODO:
-    * read in values in each spot in the queue
-    * look for spaces in current string
-    * change value to asterik
-    * remove string
-    * pass changed string to its own spot in the queue
-    * continue to iterate through queue
-    * change return
+    * change value to asterik (use correct memory addressing)
     */
-    const char sp = ' ';
+    const char sp = ' ';    
     const char ast = '*';
-    int firstSpace; 
-    firstSpace = strchr(buffer, sp);
-    buffer[r] = ast;
-    if (*r != NULL) {
-        for (int i=r+1; i<buff_size; i++) {        
-            r = strchr(buffer, sp);
-            buffer[r] = ast;
+    int *firstSpace;
+
+    while (Q.size > 0)
+    {
+        string = Q.DequeueString();
+        firstSpace = strchr(string, sp);
+        string[firstSpace] = ast;
+        if (*firstSpace != NULL) {
+            for (int i=firstSpace+1; i<strlen(string); i++) {        
+                firstSpace = strchr(string, sp);
+                string[firstSpace] = ast;
+            }
         }
+        Q.EnqueueString(string);
     }
-    return buffer;   
 }
 
-char* munch2_function(char* buffer) {
+void munch2_function() {
     // use islower and toupper!
     /* TODO:
-    * read in values in each spot in the queue
-    * look for lowercase chars in current string
-    * change value to uppercae
-    * remove string
-    * pass changed string to its own spot in the queue
-    * continue to iterate through queue
-    * change return
+    * use correct memory addressing
     */
     int lower;
     int upper;
-    for (int i=0; i<buff_size; i++) {
-        lower = islower(buffer[i]);
-        if (lower > 0) {
-            upper = toupper(buffer[i]);
-            buffer[i] = upper;
+    while (Q.size > 0) {
+        string = Q.DequeueString();
+        for (int i=0; i<strlen(string); i++) {
+            lower = islower(string[i]);
+            if (lower > 0) {
+                upper = toupper(string[i]);
+                string[i] = upper;
+            }
         }
-    } 
-    return buffer;
+        Q.EnqueueString(string); 
+    }
+
 }
 
 void writer_function() {
