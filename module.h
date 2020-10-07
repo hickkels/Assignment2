@@ -7,8 +7,10 @@ char * DequeueString(Queue *q);
 void PrintQueueStats(Queue *q);
 typedef struct Queue
 {
-    int sizeQueue;
-    int currSize;
+    int curr_size;
+    sem_t OKToEnqueue;
+    sem_t OKToDequeue;
+    sem_t MEQueue;
     int enqueCount;
     int dequeueCount;
     time_t enqueueTime;
