@@ -5,9 +5,9 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "module.h"
 #include <stdlib.h>
-#include <ctype.h>
 
  /*
  The main function calls functions to print requested fields for given process ids
@@ -18,7 +18,6 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
  
     
     printf("Please enter 10 lines:\n");
-
     // first create three queues, will return a pointer to the queue
     // make queue size 10 for testing purposes
     Queue *reader_to_munch1 = CreateStringQueue(10); 
@@ -137,8 +136,6 @@ void munch2_function() {
 void writer_function() {
     // when no more string to process, print # strings processed to stdout
     
-
-
 
 }
 
