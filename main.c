@@ -9,63 +9,21 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
 #include "module.h"
 #include <stdlib.h>
 
- /*
- The main function calls functions to print requested fields for given process ids
- Input: command line args
- Return: int representing exit on success or failure
- */
- int main(int argC, char *argV[]) {
- 
-    
-    printf("Please enter 10 lines:\n");
-    // first create three queues, will return a pointer to the queue
-    // make queue size 10 for testing purposes
-    Queue *reader_to_munch1 = CreateStringQueue(10); 
-    Queue *munch1_to_munch2 = CreateStringQueue(10);
-    Queue *munch2_to_writer = CreateStringQueue(10);
-  
-    // then create 4 pthreads using pthread_create
-    // each has its own id
-    pthread_t Reader;
-    pthread_t Writer;
-    pthread_t Munch1;
-    pthread_t Munch2;
-   
-    // then create 4 pthreads using pthread_create 
-    int read = pthread_create(&Reader, NULL, reader_function, NULL);
-    int munch1 = pthread_create(&Munch1, NULL, munch1_function, NULL);
-    int munch2 = pthread_create(&Munch2, NULL, munch2_function, NULL);
-    int write = pthread_create(&Writer, NULL, writer_function, NULL);
-    
-    // wait for these threads to finish by calling pthread_join
-    if (!read) 
-        pthread_join(Reader, NULL);
-    if (!munch1)
-        pthread_join(Munch1, NULL);
-    if (!munch2)
-        pthread_join(Munch2, NULL);
-    if (!write)
-        pthread_join(Writer, NULL);
+struct mult_args {
+    Queue *arg1;
+    Queue *arg2;
+};
 
-    // each thread will call pthread_exit
-  
-    // threads should terminate when there is no more input (end of file) TRICKY 
-  
-    // for each queue, print statistics to stderr uding PrintQueueStats function
-  
-   return 0;
- }
-
-void reader_function() {
+void reader_function(Queue *reader_to_munch1) {
     /* TODO:
     * pass each line to its own spot in the queue
     * change return
-    */   
+    */
     char input[1024];
     char *buffer;
     size_t  buff_size = 1024;
     size_t characters;
-    buffer = (char *)malloc(buff_size * sizeof(char));
+    buffer = malloc(buff_size * sizeof(char));
 
     // read in input file from stdin and set to input
     while(*(fgets(input, 1024, stdin)) != EOF) {
@@ -87,22 +45,22 @@ void reader_function() {
                 buffer[i] = '\0';
             }
         }
-        reader_to_munch1.EnqueueString(input);
         // increment line ??
+        EnqueueString(reader_to_munch1, line);
     }
 }
 
-void munch1_function() {
+void munch1_function(Queue *reader_to_munch1, Queue *munch1_to_munch2) {
     // use strchr
     /* TODO:
     * change value to asterik (use correct memory addressing)
     */
-    const char sp = ' ';    
+    const char sp = ' ';
     const char ast = '*';
     int *firstSpace;
     char *string;
 
-    string = reader_to_munch1.DequeueString();
+    string = DequeueString(reader_to_munch1);
     firstSpace = &strchr(string, sp);
     string[*firstSpace] = ast;
     if (firstSpace != NULL) {
@@ -111,10 +69,10 @@ void munch1_function() {
             string[*firstSpace] = ast;
         }
     }
-    munch1_to_munch2.EnqueueString(string);
+    EnqueueString(munch1_to_munch2, string);
 }
 
-void munch2_function() {
+void munch2_function(Queue *munch1_to_munch2, Queue *munch2_to_writer) {
     // use islower and toupper!
     /* TODO:
     * use correct memory addressing
@@ -122,7 +80,7 @@ void munch2_function() {
     int lower;
     int upper;
     char *string;
-    string = munch1_to_munch2.DequeueString();
+    string = DequeueString(munch1_to_munch2);
     for (int i=0; i<strlen(string); i++) {
         lower = islower(string[i]);
         if (lower > 0) {
@@ -130,12 +88,66 @@ void munch2_function() {
             string[i] = upper;
         }
     }
-    munch2_to_writer.EnqueueString(string); 
+    EnqueueString(munch2_to_writer, string);
 }
 
-void writer_function() {
+void writer_function(Queue *munch2_to_writer) {
     // when no more string to process, print # strings processed to stdout
-    
 
+
+}
+
+ /*
+ The main function calls functions to print requested fields for given process ids
+ Input: command line args
+ Return: int representing exit on success or failure
+ */
+ int main(int argC, char *argV[]) {
+    
+    printf("Please enter 10 lines:\n");
+    // first create three queues, will return a pointer to the queue
+    // make queue size 10 for testing purposes
+    Queue *reader_to_munch1 = CreateStringQueue(10); 
+    Queue *munch1_to_munch2 = CreateStringQueue(10);
+    Queue *munch2_to_writer = CreateStringQueue(10);
+  
+    // then create 4 pthreads using pthread_create
+    // each has its own id
+    pthread_t Reader;
+    pthread_t Writer;
+    pthread_t Munch1;
+    pthread_t Munch2;
+
+    struct mult_args m1_args;
+    m1_args.arg1 = reader_to_munch1;
+    m1_args.arg2 = munch1_to_munch2;
+
+    struct mult_args m2_args;
+    m2_args.arg1 = munch1_to_munch2;
+    m2_args.arg2 = munch2_to_writer;
+    
+    // then create 4 pthreads using pthread_create 
+    int read = -pthread_create(&Reader, NULL, &reader_function, (void *)reader_to_munch1);
+    int munch1 = -pthread_create(&Munch1, NULL, &munch1_function, (void *)&m1_args);
+    int munch2 = -pthread_create(&Munch2, NULL, &munch2_function, (void *)&m2_args);
+    int write = -pthread_create(&Writer, NULL, &writer_function, (void *)munch2_to_writer);
+    
+    // wait for these threads to finish by calling pthread_join
+    if (!read) 
+        pthread_join(Reader, NULL);
+    if (!munch1)
+        pthread_join(Munch1, NULL);
+    if (!munch2)
+        pthread_join(Munch2, NULL);
+    if (!write)
+        pthread_join(Writer, NULL);
+
+    // each thread will call pthread_exit
+  
+    // threads should terminate when there is no more input (end of file) TRICKY 
+  
+    // for each queue, print statistics to stderr uding PrintQueueStats function
+  
+   return 0;
 }
 
