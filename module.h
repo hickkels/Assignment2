@@ -1,10 +1,7 @@
 #ifndef MODULE_HEADER
 #define MODULE_HEADER
+#include <semaphore.h>
 
-Queue *CreateStringQueue(int size);
-void EnqueueString(Queue *q, char *string);
-char * DequeueString(Queue *q);
-void PrintQueueStats(Queue *q);
 typedef struct Queue
 {
     int curr_size;
@@ -17,5 +14,9 @@ typedef struct Queue
     time_t dequeueTime;
     char **strings;
 } Queue;
+Queue *CreateStringQueue(int size);
+void EnqueueString(Queue *q, char *string);
+char * DequeueString(Queue *q);
+void PrintQueueStats(Queue *q);
 
 #endif
