@@ -3,8 +3,10 @@ Cecelia Peterson: cpeterson36@wisc.edu, 9073157274
 Kelsey Hickok: khickok@wisc.edu, 9076435016
 */
 
-
+#include <stdio.h>
+#include <string.h>
 #include "module.h"
+
 
  /*
  The main function calls functions to print requested fields for given process ids
@@ -12,23 +14,16 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
  Return: int representing exit on success or failure
  */
  int main(int argC, char *argV[]) {
-  
-    // create a synchronization var for each queue
-   
  
-    // first create three queues, will return a pointer to the queu
-    Queue *Q = CreateStringQueue(10); 
-    
-    /*read in input here or in Reader function?*/
-    char input; 
     char *line = NULL;
     
     printf("Please enter 10 lines:\n");
-    for (int i=0; i<10; i++) {
-        // input = char string of whatever the user inputs
-        // send string to reader function  
-        inp
-    // each will be size
+
+    // first create three queues, will return a pointer to the queue
+    // make queue size 10 for testing purposes
+    Queue *reader_to_munch1 = CreateStringQueue(10); 
+    Queue *munch1_to_munch2 = CreateStringQueue(10);
+    Queue *munch2_to_writer = CreateStringQueue(10);
   
     // then create 4 pthreads using pthread_create
     // each has its own id
@@ -37,11 +32,13 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
     pthread_t Munch1;
     pthread_t Munch2;
    
-    int read = pthread_create(&Reader, NULL, *reader_function, NULL);
-    int munch1 = pthread_create(&Munch1, NULL, *munch1_function, NULL);
-    int munch2 = pthread_create(&Munch2, NULL, *munch2_function, NULL);
-    int write = pthread_create(&Writer, NULL, *writer_function, NULL);
+    // then create 4 pthreads using pthread_create 
+    int read = pthread_create(&Reader, NULL, reader_function, NULL);
+    int munch1 = pthread_create(&Munch1, NULL, munch1_function, NULL);
+    int munch2 = pthread_create(&Munch2, NULL, munch2_function, NULL);
+    int write = pthread_create(&Writer, NULL, writer_function, NULL);
     
+    // wait for these threads to finish by calling pthread_join
     if (!read) 
         pthread_join(Reader, NULL);
     if (!munch1)
@@ -51,23 +48,11 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
     if (!write)
         pthread_join(Writer, NULL);
 
-    // thread Reader will read in each input line from stdin
-    // must check that the input line does not exceed the size of your buffer
-    // it it does: reject that line by 
-    // (1) printing out an error message to stderr and 
-    // (2) throw away (flush to end of line) any remaining characters on that line
-   
-    // wait for these threads to finish by calling pthread_join
     // each thread will call pthread_exit
-   // then create 4 pthreads using pthread_create
-   // wait for these threads to finish by calling pthread_join
-   // each thread will call pthread_exit
   
-    // threads should terminate when there is no more input (end of file) TRICKY
-   
+    // threads should terminate when there is no more input (end of file) TRICKY 
   
     // for each queue, print statistics to stderr uding PrintQueueStats function
-  
   
    return 0;
  }
@@ -85,6 +70,12 @@ void reader_function() {
 
     while(fgets(input, sizeof input, stdin) != NULL) {
         line = getline(input, sizeofinput);
+
+    // thread Reader will read in each input line from stdin
+    // must check that the input line does not exceed the size of your buffer
+    // it it does: reject that line by
+    // (1) printing out an error message to stderr and
+    // (2) throw away (flush to end of line) any remaining characters on that line
         if(buffer == NULL) {
             fprintf(stderr, "Unable to allocate buffer.");
             exit(1);
@@ -96,8 +87,7 @@ void reader_function() {
                 buffer[i] = '\0';
             }
         }
-        Q.EnqueueString(line);
-    }
+        reader_to_munch1.EnqueueString(line);
     }
 }
 
@@ -109,20 +99,18 @@ void munch1_function() {
     const char sp = ' ';    
     const char ast = '*';
     int *firstSpace;
+    char *string;
 
-    while (Q.size > 0)
-    {
-        string = Q.DequeueString();
-        firstSpace = strchr(string, sp);
-        string[firstSpace] = ast;
-        if (*firstSpace != NULL) {
-            for (int i=firstSpace+1; i<strlen(string); i++) {        
-                firstSpace = strchr(string, sp);
-                string[firstSpace] = ast;
-            }
+    string = reader_to_munch1.DequeueString();
+    firstSpace = strchr(string, sp);
+    string[firstSpace] = ast;
+    if (*firstSpace != NULL) {
+        for (int i=firstSpace+1; i<strlen(string); i++) {        
+            firstSpace = strchr(string, sp);
+            string[firstSpace] = ast;
         }
-        Q.EnqueueString(string);
     }
+    munch1_to_munch2.EnqueueString(string);
 }
 
 void munch2_function() {
@@ -132,18 +120,16 @@ void munch2_function() {
     */
     int lower;
     int upper;
-    while (Q.size > 0) {
-        string = Q.DequeueString();
-        for (int i=0; i<strlen(string); i++) {
-            lower = islower(string[i]);
-            if (lower > 0) {
-                upper = toupper(string[i]);
-                string[i] = upper;
-            }
+    char *string;
+    string = munch1_to_munch2.DequeueString();
+    for (int i=0; i<strlen(string); i++) {
+        lower = islower(string[i]);
+        if (lower > 0) {
+            upper = toupper(string[i]);
+            string[i] = upper;
         }
-        Q.EnqueueString(string); 
     }
-
+    munch2_to_writer.EnqueueString(string); 
 }
 
 void writer_function() {
