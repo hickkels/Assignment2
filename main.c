@@ -6,7 +6,8 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
 #include <stdio.h>
 #include <string.h>
 #include "module.h"
-
+#include <stdlib.h>
+#include <ctype.h>
 
  /*
  The main function calls functions to print requested fields for given process ids
@@ -15,7 +16,6 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
  */
  int main(int argC, char *argV[]) {
  
-    char *line = NULL;
     
     printf("Please enter 10 lines:\n");
 
@@ -63,13 +63,14 @@ void reader_function() {
     * change return
     */   
     char input[1024];
-    char *buffer, *line;
+    char *buffer;
     size_t  buff_size = 1024;
     size_t characters;
     buffer = (char *)malloc(buff_size * sizeof(char));
 
-    while(fgets(input, sizeof input, stdin) != NULL) {
-        line = getline(input, sizeofinput);
+    // read in input file from stdin and set to input
+    while(*(fgets(input, 1024, stdin)) != EOF) {
+        // get the current line
 
     // thread Reader will read in each input line from stdin
     // must check that the input line does not exceed the size of your buffer
@@ -81,13 +82,14 @@ void reader_function() {
             exit(1);
         }
         characters = getline(&buffer, &buff_size, stdin);    
-        if (characters > n) {
+        if (characters > buff_size) {
             fprintf(stderr, "Input line has exceeded buffer length.");
             for (int i=buff_size; i<characters; i++) {
                 buffer[i] = '\0';
             }
         }
-        reader_to_munch1.EnqueueString(line);
+        reader_to_munch1.EnqueueString(input);
+        // increment line ??
     }
 }
 
@@ -102,12 +104,12 @@ void munch1_function() {
     char *string;
 
     string = reader_to_munch1.DequeueString();
-    firstSpace = strchr(string, sp);
-    string[firstSpace] = ast;
-    if (*firstSpace != NULL) {
-        for (int i=firstSpace+1; i<strlen(string); i++) {        
-            firstSpace = strchr(string, sp);
-            string[firstSpace] = ast;
+    firstSpace = &strchr(string, sp);
+    string[*firstSpace] = ast;
+    if (firstSpace != NULL) {
+        for (int i=*firstSpace+1; i<strlen(string); i++) {        
+            firstSpace = &strchr(string, sp);
+            string[*firstSpace] = ast;
         }
     }
     munch1_to_munch2.EnqueueString(string);
