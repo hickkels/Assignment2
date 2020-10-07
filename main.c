@@ -16,7 +16,7 @@ struct mult_args {
     Queue *arg2;
 };
 
-void* reader_function(Queue *reader_to_munch1) {
+void* reader_function(void *reader_to_munch1) {
     /* TODO:
     * pass each line to its own spot in the queue
     * change return
@@ -50,9 +50,10 @@ void* reader_function(Queue *reader_to_munch1) {
         // increment line ??
         EnqueueString(reader_to_munch1, input);
     }
+    return 0;
 }
 
-void* munch1_function(Queue *reader_to_munch1, Queue *munch1_to_munch2) {
+void* munch1_function(void *reader_to_munch1, void *munch1_to_munch2) {
     // use strchr
     /* TODO:
     * change value to asterik (use correct memory addressing)
@@ -63,18 +64,19 @@ void* munch1_function(Queue *reader_to_munch1, Queue *munch1_to_munch2) {
     char *string;
 
     string = DequeueString(reader_to_munch1);
-    firstSpace = &strchr(string, sp);
+    firstSpace = strchr(string, sp);
     string[*firstSpace] = ast;
     if (firstSpace != NULL) {
         for (int i=*firstSpace+1; i<strlen(string); i++) {        
-            firstSpace = &strchr(string, sp);
+            firstSpace = strchr(string, sp);
             string[*firstSpace] = ast;
         }
     }
     EnqueueString(munch1_to_munch2, string);
+    return 0;
 }
 
-void* munch2_function(Queue *munch1_to_munch2, Queue *munch2_to_writer) {
+void* munch2_function(void *munch1_to_munch2, void *munch2_to_writer) {
     // use islower and toupper!
     /* TODO:
     * use correct memory addressing
@@ -91,12 +93,22 @@ void* munch2_function(Queue *munch1_to_munch2, Queue *munch2_to_writer) {
         }
     }
     EnqueueString(munch2_to_writer, string);
+    return 0;
 }
 
 void* writer_function(Queue *munch2_to_writer) {
-    // when no more string to process, print # strings processed to stdout
-
-
+    // when no more string to process, print queue statistics
+    // print each string
+    char *outString;
+    printf("Output: \n");
+    while (counter <= munch2_to_writer.size())
+    {
+        outString = DequeueString(munch2_to_writer);
+        fprintf("%s/n", outString);
+    }
+    printf("Queue statistics: \n");
+    PrintQueueStats(munch2_to_writer);
+    return 0;
 }
 
  /*
