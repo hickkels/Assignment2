@@ -25,9 +25,9 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
     
     printf("Please enter 10 lines:\n");
     for (int i=0; i<10; i++) {
-        input = getline(&line, &len, stdin);
-        
-    }
+        // input = char string of whatever the user inputs
+        // send string to reader function  
+        inp
     // each will be size
   
     // then create 4 pthreads using pthread_create
@@ -77,24 +77,27 @@ void reader_function() {
     * pass each line to its own spot in the queue
     * change return
     */   
-    char *buffer;
+    char input[1024];
+    char *buffer, *line;
     size_t  buff_size = 1024;
     size_t characters;
     buffer = (char *)malloc(buff_size * sizeof(char));
-    while (Q.size > 0) {
+
+    while(fgets(input, sizeof input, stdin) != NULL) {
+        line = getline(input, sizeofinput);
         if(buffer == NULL) {
             fprintf(stderr, "Unable to allocate buffer.");
             exit(1);
         }
         characters = getline(&buffer, &buff_size, stdin);    
-
         if (characters > n) {
             fprintf(stderr, "Input line has exceeded buffer length.");
             for (int i=buff_size; i<characters; i++) {
                 buffer[i] = '\0';
             }
         }
-        Q.EnqueueString(buffer);
+        Q.EnqueueString(line);
+    }
     }
 }
 
