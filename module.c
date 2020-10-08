@@ -74,7 +74,10 @@ char * DequeueString(Queue *q) {
     *(q->strings)[q->curr_size] = NULL; // ??is this right
     q->curr_size--;
     q->dequeueCount++;
-    
+   
+
+    sem_post(q->MEQueue);
+    sem-post(q->OKToEnqueue); 
     // stop recording dequeue time
     time_t end_dequeue = time(NULL);    
     q->dequeueTime = ("%.2f\n", (long int) (end_dequeue - start_dequeue));

@@ -11,16 +11,17 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
 #include "module.h"
 #include <stdlib.h>
 
-struct mult_args {
+struct Mult_args {
     Queue *arg1;
     Queue *arg2;
 };
 
-void* reader_function(void *reader_to_munch1) {
+void* reader_function(void *queue_ptr) {
     /* TODO:
     * pass each line to its own spot in the queue
     * change return
     */
+    Queue *reader_to_munch1 = (Queue *) queue_ptr; 
     char input[1024];
     char *buffer;
     size_t  buff_size = 1024;
@@ -53,11 +54,14 @@ void* reader_function(void *reader_to_munch1) {
     return 0;
 }
 
-void* munch1_function(void *reader_to_munch1, void *munch1_to_munch2) {
+void* munch1_function(void *m1_args) {
     // use strchr
     /* TODO:
     * change value to asterik (use correct memory addressing)
     */
+    struct Mult_args *args = (struct Mult_args *)m1_args;
+    Queue *reader_to_munch1 = (Queue *) args->arg1; 
+    Queue *munch1_to_munch2 = (Queue *) args->arg2;
     const char sp = ' ';
     const char ast = '*';
     int *firstSpace;
@@ -76,11 +80,14 @@ void* munch1_function(void *reader_to_munch1, void *munch1_to_munch2) {
     return 0;
 }
 
-void* munch2_function(void *munch1_to_munch2, void *munch2_to_writer) {
+void* munch2_function(void *m2_args) {
     // use islower and toupper!
     /* TODO:
     * use correct memory addressing
     */
+    struct Mult_args *args = (struct Mult_args *)m2_args;
+    Queue *munch1_to_munch2 = (Queue *) (args->arg1);
+    Queue *munch2_to_writer = (Queue *) (args->arg2);
     int lower;
     int upper;
     char *string;
@@ -96,9 +103,11 @@ void* munch2_function(void *munch1_to_munch2, void *munch2_to_writer) {
     return 0;
 }
 
-void* writer_function(Queue *munch2_to_writer) {
+void* writer_function(void *queue_ptr) {
     // when no more string to process, print queue statistics
     // print each string
+
+    Queue *munch2_to_writer = (Queue *) queue_ptr;
     char *outString;
     printf("Output: \n");
     // while the counter value isn't greater than the last string's address space
@@ -110,6 +119,7 @@ void* writer_function(Queue *munch2_to_writer) {
     }
     printf("Queue statistics: \n");
     PrintQueueStats(munch2_to_writer);
+    
     return 0;
 }
 
@@ -134,19 +144,19 @@ void* writer_function(Queue *munch2_to_writer) {
     pthread_t Munch1;
     pthread_t Munch2;
 
-    struct mult_args m1_args;
+    struct Mult_args m1_args;
     m1_args.arg1 = reader_to_munch1;
     m1_args.arg2 = munch1_to_munch2;
 
-    struct mult_args m2_args;
+    struct Mult_args m2_args;
     m2_args.arg1 = munch1_to_munch2;
     m2_args.arg2 = munch2_to_writer;
     
     // then create 4 pthreads using pthread_create 
-    int read = -pthread_create(&Reader, NULL, &reader_function, (void *)reader_to_munch1);
-    int munch1 = -pthread_create(&Munch1, NULL, &munch1_function, (void *)&m1_args);
-    int munch2 = -pthread_create(&Munch2, NULL, &munch2_function, (void *)&m2_args);
-    int write = -pthread_create(&Writer, NULL, &writer_function, (void *)munch2_to_writer);
+    int read = -pthread_create(&Reader, NULL, &reader_function, (void *)(reader_to_munch1));
+    int munch1 = -pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
+    int munch2 = -pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
+    int write = -pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
     
     // wait for these threads to finish by calling pthread_join
     if (!read) 
