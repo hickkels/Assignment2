@@ -101,10 +101,12 @@ void* writer_function(Queue *munch2_to_writer) {
     // print each string
     char *outString;
     printf("Output: \n");
+    // while the counter value isn't greater than the last string's address space
     while (counter <= munch2_to_writer.size())
     {
         outString = DequeueString(munch2_to_writer);
         fprintf("%s/n", outString);
+        counter++;
     }
     printf("Queue statistics: \n");
     PrintQueueStats(munch2_to_writer);
