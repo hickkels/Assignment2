@@ -17,67 +17,61 @@ struct Mult_args {
 };
 
 void* reader_function(void *queue_ptr) {
-    /* TODO:
-    * pass each line to its own spot in the queue
-    * change return
-    */
     Queue *reader_to_munch1 = (Queue *) queue_ptr; 
-    char input[1024];
-    char *buffer;
     size_t  buff_size = 1024;
-    size_t characters;
-    buffer = malloc(buff_size * sizeof(char));
-
-    // read in input file from stdin and set to input
-    while(*(fgets(input, 1024, stdin)) != EOF) {
-        // get the current line
+    size_t len = 0;
+    char* string = NULL;
+    int ch;
+    int characters = 0;
 
     // thread Reader will read in each input line from stdin
     // must check that the input line does not exceed the size of your buffer
     // it it does: reject that line by
     // (1) printing out an error message to stderr and
     // (2) throw away (flush to end of line) any remaining characters on that line
-        if(buffer == NULL) {
-            fprintf(stderr, "Unable to allocate buffer.");
-            exit(1);
+    
+    /* TODO:
+    * change usage of c and fgetc (int vs char)
+    */
+    while (EOF != (ch = fgetc(stdin))) {
+        while ((ch = fgetc(stdin)) != '\n') {
+            string = malloc(buff_size * sizeof(char));
+            string[len++] = ch;
+            characters++;
         }
-        characters = getline(&buffer, &buff_size, stdin);    
         if (characters > buff_size) {
             fprintf(stderr, "Input line has exceeded buffer length.");
             for (int i=buff_size; i<characters; i++) {
-                buffer[i] = '\0';
+                string[i] = '\0';
             }
-        }
-        // increment line ??
-        EnqueueString(reader_to_munch1, input);
+        } else {
+            EnqueueString(reader_to_munch1, string);
+        } 
     }
-    return 0;
+    EnqueueString(reader_to_munch1, NULL);
+    pthread_exit(0);
 }
 
 void* munch1_function(void *m1_args) {
     // use strchr
-    /* TODO:
-    * change value to asterik (use correct memory addressing)
-    */
     struct Mult_args *args = (struct Mult_args *)m1_args;
     Queue *reader_to_munch1 = (Queue *) args->arg1; 
     Queue *munch1_to_munch2 = (Queue *) args->arg2;
-    const char sp = ' ';
-    const char ast = '*';
-    int *firstSpace;
-    char *string;
-
-    string = DequeueString(reader_to_munch1);
-    firstSpace = strchr(string, sp);
-    string[*firstSpace] = ast;
-    if (firstSpace != NULL) {
-        for (int i=*firstSpace+1; i<strlen(string); i++) {        
-            firstSpace = strchr(string, sp);
-            string[*firstSpace] = ast;
+    char sp = ' ';
+    char ast = '*';
+    char* string;
+    char* strPtr;
+    int count = 0;
+    while(reader_to_munch1->curr_size >= count) {
+        string = DequeueString(reader_to_munch1);
+        strPtr = string;
+        while((strPtr = strchr (strPtr, sp)) != NULL) {
+            *strPtr++ = ast;
         }
-    }
-    EnqueueString(munch1_to_munch2, string);
-    return 0;
+        EnqueueString(munch1_to_munch2, string);
+        count++;
+    }    
+    pthread_exit(0);
 }
 
 void* munch2_function(void *m2_args) {
@@ -91,16 +85,21 @@ void* munch2_function(void *m2_args) {
     int lower;
     int upper;
     char *string;
-    string = DequeueString(munch1_to_munch2);
-    for (int i=0; i<strlen(string); i++) {
-        lower = islower(string[i]);
-        if (lower > 0) {
-            upper = toupper(string[i]);
-            string[i] = upper;
+    int count = 0;
+
+    while (munch1_to_munch2->curr_size >= count) {
+        string = DequeueString(munch1_to_munch2);
+        for (int i=0; i<strlen(string); i++) {
+            lower = islower(string[i]);
+            if (lower > 0) {
+                upper = toupper(string[i]);
+                string[i] = upper;
+            }
         }
+        EnqueueString(munch2_to_writer, string);
+        count++;
     }
-    EnqueueString(munch2_to_writer, string);
-    return 0;
+    pthread_exit(0);
 }
 
 void* writer_function(void *queue_ptr) {
@@ -109,18 +108,17 @@ void* writer_function(void *queue_ptr) {
 
     Queue *munch2_to_writer = (Queue *) queue_ptr;
     char *outString;
+    int count = 0;
+
     printf("Output: \n");
     // while the counter value isn't greater than the last string's address space
-    while (counter <= munch2_to_writer.size())
+    while (munch2_to_writer->curr_size >= count)
     {
         outString = DequeueString(munch2_to_writer);
-        fprintf("%s/n", outString);
-        counter++;
+        printf("%s\n", outString);
+        count++;
     }
-    printf("Queue statistics: \n");
-    PrintQueueStats(munch2_to_writer);
-    
-    return 0;
+    pthread_exit(0);
 }
 
  /*
@@ -174,6 +172,8 @@ void* writer_function(void *queue_ptr) {
   
     // for each queue, print statistics to stderr uding PrintQueueStats function
   
-   return 0;
+    printf("Queue statistics: \n");
+    PrintQueueStats(munch2_to_writer);
+    pthread_exit(0);
 }
 
