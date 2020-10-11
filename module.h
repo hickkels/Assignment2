@@ -8,7 +8,7 @@ typedef struct Queue
     sem_t OKToEnqueue;
     sem_t OKToDequeue;
     sem_t MEQueue;
-    int enqueCount;
+    int enqueueCount;
     int dequeueCount;
     time_t enqueueTime;
     time_t dequeueTime;
