@@ -11,112 +11,133 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
 #include "module.h"
 #include <stdlib.h>
 
+// structs to define queues
 struct Mult_args {
     Queue *arg1;
     Queue *arg2;
 };
 
+/* Read from standard input, one line at a time. 
+* Reader will take the each line of the input and pass it to thread Munch1 through a queue of character strings
+*/
 void* reader_function(void *queue_ptr) {
     Queue *reader_to_munch1 = (Queue *) queue_ptr; 
-    size_t  buff_size = 1024;
-    size_t len = 0;
-    char* string = NULL;
-    int ch;
-    int characters = 0;
+    size_t  buff_size = 1024; // max size of buffer
+    size_t len = 0; // initial size of string
+    char* string = NULL; // initial string set to NULL
+    int ch; // character to be iterated and read in from stdin
+    int characters = 0; // count of characters in string
 
-    // thread Reader will read in each input line from stdin
-    // must check that the input line does not exceed the size of your buffer
-    // it it does: reject that line by
-    // (1) printing out an error message to stderr and
-    // (2) throw away (flush to end of line) any remaining characters on that line
-    
-    /* TODO:
-    * change usage of c and fgetc (int vs char)
-    */
+    // while character iterated is not equal to the end of file character
     while (EOF != (ch = fgetc(stdin))) {
+        // while character iterated is not the end of line character
         while ((ch = fgetc(stdin)) != '\n') {
-            string = malloc(buff_size * sizeof(char));
-            string[len++] = ch;
-            characters++;
+            string = malloc(buff_size * sizeof(char)); // allocate enough room for the string with the buffer size
+            string[len++] = ch; // read in characters and set equal to corresponding position
+            characters++; // increment character count of string
         }
+        // if input line exceeds buffer size
         if (characters > buff_size) {
-            fprintf(stderr, "Input line has exceeded buffer length.");
-            for (int i=buff_size; i<characters; i++) {
+            fprintf(stderr, "Input line has exceeded buffer length."); // print error
+            // flush to end of live any remaining characters on that line
+            for (int i=buff_size; i<characters; i++) { 
                 string[i] = '\0';
             }
         } else {
-            EnqueueString(reader_to_munch1, string);
+            EnqueueString(reader_to_munch1, string); // pass line to queue
         } 
     }
     EnqueueString(reader_to_munch1, NULL);
     pthread_exit(0);
 }
 
+/* Scan the line and replace each space character (not tabs or newlines) with an asterisk ("*") character. 
+* It will then pass the line to thread Munch2 through another queue of character strings.
+*/
 void* munch1_function(void *m1_args) {
-    // use strchr
+
     struct Mult_args *args = (struct Mult_args *)m1_args;
+
+    // initialize queues used in munch1
     Queue *reader_to_munch1 = (Queue *) args->arg1; 
     Queue *munch1_to_munch2 = (Queue *) args->arg2;
+
+    // initialize other variables used in munch1
     char sp = ' ';
     char ast = '*';
     char* string;
     char* strPtr;
     int count = 0;
+
+    // while the queue size is not exceeded
     while(reader_to_munch1->curr_size >= count) {
-        string = DequeueString(reader_to_munch1);
-        strPtr = string;
+        string = DequeueString(reader_to_munch1); // take out string and remove from queue
+        strPtr = string; // set string pointer equal to string
+        // while there is a space character found in the string
         while((strPtr = strchr (strPtr, sp)) != NULL) {
-            *strPtr++ = ast;
+            *strPtr++ = ast; // replace space character with asterik 
         }
-        EnqueueString(munch1_to_munch2, string);
-        count++;
+        EnqueueString(munch1_to_munch2, string); // pass new string to queue
+        count++; // increment counter for queue size
     }    
     pthread_exit(0);
 }
 
+/* Scan the line and convert all lower case letters to upper case (e.g., convert "a" to "A"). 
+* It will then pass the line to thread Writer though yet another queue of character strings.
+*/
 void* munch2_function(void *m2_args) {
-    // use islower and toupper!
-    /* TODO:
-    * use correct memory addressing
-    */
+    
     struct Mult_args *args = (struct Mult_args *)m2_args;
+
+    // initialize queues used in munch2
     Queue *munch1_to_munch2 = (Queue *) (args->arg1);
     Queue *munch2_to_writer = (Queue *) (args->arg2);
+    
+    // initialize other variables used in munch2
     int lower;
     int upper;
     char *string;
     int count = 0;
 
+    // while the queue size is not exceeded
     while (munch1_to_munch2->curr_size >= count) {
-        string = DequeueString(munch1_to_munch2);
+        string = DequeueString(munch1_to_munch2); // take out string and remove from queue
+        // iterate through string
         for (int i=0; i<strlen(string); i++) {
-            lower = islower(string[i]);
+            lower = islower(string[i]); // find lower case character
+            // if lower case character = true
             if (lower > 0) {
-                upper = toupper(string[i]);
-                string[i] = upper;
+                upper = toupper(string[i]); // change character to uppercase
+                string[i] = upper; // update in ptr
             }
         }
-        EnqueueString(munch2_to_writer, string);
-        count++;
+        EnqueueString(munch2_to_writer, string); // pass new string to queue
+        count++; // increment counter for queue size
     }
     pthread_exit(0);
 }
 
+/* Write line to standard output */
 void* writer_function(void *queue_ptr) {
     // when no more string to process, print queue statistics
     // print each string
 
+    // initialize queue used in writer
     Queue *munch2_to_writer = (Queue *) queue_ptr;
+
+    // initialize other variables used in munch
     char *outString;
     int count = 0;
 
     printf("Output: \n");
-    // while the counter value isn't greater than the last string's address space
+    
+    // while the queue size is not exceeded
     while (munch2_to_writer->curr_size >= count)
     {
-        outString = DequeueString(munch2_to_writer);
-        printf("%s\n", outString);
-        count++;
+        outString = DequeueString(munch2_to_writer); // take out string and remove from queue
+        printf("%s\n", outString); // print string
+        count++; // increment counter for queue size
     }
     pthread_exit(0);
 }
@@ -128,7 +149,8 @@ void* writer_function(void *queue_ptr) {
  */
  int main(int argC, char *argV[]) {
     
-    printf("Please enter 10 lines:\n");
+    printf("Input:\n");
+
     // first create three queues, will return a pointer to the queue
     // make queue size 10 for testing purposes
     Queue *reader_to_munch1 = CreateStringQueue(10); 
@@ -166,12 +188,8 @@ void* writer_function(void *queue_ptr) {
     if (!write)
         pthread_join(Writer, NULL);
 
-    // each thread will call pthread_exit
-  
-    // threads should terminate when there is no more input (end of file) TRICKY 
   
     // for each queue, print statistics to stderr uding PrintQueueStats function
-  
     printf("Queue statistics: \n");
     PrintQueueStats(munch2_to_writer);
     pthread_exit(0);
