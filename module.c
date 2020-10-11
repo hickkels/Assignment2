@@ -39,7 +39,6 @@ Queue *CreateStringQueue(int size){
 void EnqueueString(Queue *q, char *string) {
     // SHOULD THIS start before or after the wait?
     time_t start_enqueue = time(NULL);
-     
     sem_wait(q->OKToEnqueue);
     sem_wait(q->MEQueue);
 

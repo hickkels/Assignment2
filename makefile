@@ -1,4 +1,4 @@
-iCC = gcc
+CC = gcc
 WARNING_FLAGS = -g -Wall -Wextra
 EXE = prodcom
 
