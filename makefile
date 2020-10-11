@@ -10,7 +10,7 @@ WARNING_FLAGS = -g -Wall -Wextra
 #
 CC = gcc
 WARNING_FLAGS = -Wall -Wextra
-OPTS = pthread
+OPTS = -pthread
 EXE = prodcom
 SCAN_BUILD_DIR = scan-build-out
 
