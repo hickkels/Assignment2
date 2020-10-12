@@ -26,7 +26,7 @@ void* reader_function(void *queue_ptr) {
     size_t len = 0; // initial size of string
     char* string = NULL; // initial string set to NULL
     int ch; // character to be iterated and read in from stdin
-    int characters = 0; // count of characters in string
+    size_t characters = 0; // count of characters in string
 
     // while character iterated is not equal to the end of file character
     while (EOF != (ch = fgetc(stdin))) {
@@ -40,7 +40,7 @@ void* reader_function(void *queue_ptr) {
         if (characters > buff_size) {
             fprintf(stderr, "Input line has exceeded buffer length."); // print error
             // flush to end of live any remaining characters on that line
-            for (int i=buff_size; i<characters; i++) { 
+            for (int i=buff_size; (size_t)i<characters; i++) { 
                 string[i] = '\0';
             }
         } else {
@@ -104,7 +104,7 @@ void* munch2_function(void *m2_args) {
     while (munch1_to_munch2->curr_size >= count) {
         string = DequeueString(munch1_to_munch2); // take out string and remove from queue
         // iterate through string
-        for (int i=0; i<strlen(string); i++) {
+        for (int i=0; (size_t)i<strlen(string); i++) {
             lower = islower(string[i]); // find lower case character
             // if lower case character = true
             if (lower > 0) {
@@ -147,7 +147,7 @@ void* writer_function(void *queue_ptr) {
  Input: command line args
  Return: int representing exit on success or failure
  */
- int main(int argC, char *argV[]) {
+ int main() {
     
     printf("Input:\n");
 

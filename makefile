@@ -1,5 +1,5 @@
 CC = gcc
-WARNING_FLAGS = -g -Wall -Wextra
+WARNING_FLAGS = -g -Wall -Wextra -lpthread
 #
 # Sample makefile updated to include the commands to run the Clang Static Analyzer
 #
@@ -10,7 +10,7 @@ WARNING_FLAGS = -g -Wall -Wextra
 #
 CC = gcc
 WARNING_FLAGS = -Wall -Wextra
-OPTS = pthread
+OPTS = -lpthread
 EXE = prodcom
 SCAN_BUILD_DIR = scan-build-out
 
