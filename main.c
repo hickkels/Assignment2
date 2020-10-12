@@ -17,13 +17,16 @@ struct Mult_args {
     Queue *arg2;
 };
 
+static int MAX_BUFF = 4096;
+static int QUEUE_SIZE = 10;
+
 /* Read from standard input, one line at a time. 
 * Reader will take the each line of the input and pass it to thread Munch1 through a queue of character strings
 */
 void* reader_function(void *queue_ptr) {
     printf("entered reader function\n");
     Queue *reader_to_munch1 = (Queue *) queue_ptr; 
-    size_t  buff_size = 4096; // max size of buffer
+    size_t  buff_size = MAX_BUFF; // max size of buffer
     size_t len = 0; // initial size of string
     char* string = NULL; // initial string set to NULL
     char ch; // character to be iterated and read in from stdin
@@ -32,16 +35,14 @@ void* reader_function(void *queue_ptr) {
     ch = (char) fgetc(stdin);
     // while character iterated is not equal to the end of file character
     while (EOF != ch) {
-        printf("inside while loop\n");
+	string = malloc(buff_size * sizeof(char)); // allocate enough room for the string with the buffer size
         // while character iterated is not the end of line character
         while (ch != '\n') {
-            printf("inside while loop\n");
-	    printf("%c\n", ch);
-            string = malloc(buff_size * sizeof(char)); // allocate enough room for the string with the buffer size
             string[len++] = ch; // read in characters and set equal to corresponding position
             characters++; // increment character count of string
             ch = (char) fgetc(stdin);
 	}
+        printf(string);
         // if input line exceeds buffer size
         if (characters > buff_size) {
 	    printf("char %ld is greater than buff size %ld\n", characters, buff_size);
@@ -163,9 +164,9 @@ void* writer_function(void *queue_ptr) {
 
     // first create three queues, will return a pointer to the queue
     // make queue size 10 for testing purposes
-    Queue *reader_to_munch1 = CreateStringQueue(10); 
-    Queue *munch1_to_munch2 = CreateStringQueue(10);
-    Queue *munch2_to_writer = CreateStringQueue(10);
+    Queue *reader_to_munch1 = CreateStringQueue(QUEUE_SIZE); 
+    Queue *munch1_to_munch2 = CreateStringQueue(QUEUE_SIZE);
+    Queue *munch2_to_writer = CreateStringQueue(QUEUE_SIZE);
   
     // then create 4 pthreads using pthread_create
     // each has its own id
@@ -185,10 +186,10 @@ void* writer_function(void *queue_ptr) {
     printf("initializing pthreads\n");
  
     // then create 4 pthreads using pthread_create 
-    int read = -pthread_create(&Reader, NULL, &reader_function, (void *)(reader_to_munch1));
-    //int munch1 = -pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
-    //int munch2 = -pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
-    //int write = -pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
+    int read = pthread_create(&Reader, NULL, &reader_function, (void *)(reader_to_munch1));
+    //int munch1 = pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
+    //int munch2 = pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
+    //int write = pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
    
     printf("initialized pthreads\n");
  

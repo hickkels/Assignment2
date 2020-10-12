@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <semaphore.h> 
 
 //NOTES:
 // should count empty lines: made up of two newline characters
@@ -17,15 +18,16 @@ Queue *CreateStringQueue(int size){
 
     printf("In create string queue\n");
     // malloc queue struct 
-    Queue *q, q1;
-    q = &q1; // not sure about this, leave it until testing
+    Queue *q;
+    q = malloc(sizeof(Queue));
  
     // malloc the char ** array pointed to from that structure
     q->strings = malloc(sizeof(char*)*size);
     if ((q->strings)==NULL) {
         printf("Error while allocating 2D char array\n");
         exit(1);
-    }     
+    }
+    // malloc each char *     
    
     // sychronization vars used in the structure
     sem_init(&(q->OKToDequeue), 0, 0); 
@@ -43,7 +45,7 @@ Queue *CreateStringQueue(int size){
 * If the queue is full, then this function blocks until there is space available
 */
 void EnqueueString(Queue *q, char *string) {
-    
+   
     printf("ENTERED ENQUEUE\n");
     // SHOULD THIS start before or after the wait?
     time_t start_enqueue = time(NULL);
@@ -56,16 +58,16 @@ void EnqueueString(Queue *q, char *string) {
     if (sem_check==-1) {
         printf("Error waiting to OKToEnqueue\n");
     }
-    printf("a\n");
+    printf("before MEQ\n");
     sem_check = sem_wait(&(q->MEQueue));
-    printf("a\n");
+    printf("after MEQ\n");
     if (sem_check==-1) {
 	printf("Error waiting to MEQueue\n");
     }
-   
     printf("about to enqueue\n"); 
     // enqueue
-    *((q->strings)+(q->curr_size)) = string;
+    q->strings[0] = malloc(sizeof(char)*100);
+    q->strings[0] = string;
     q->enqueueCount++;
     q->curr_size++;    
     printf("Enqueued a string\n");
