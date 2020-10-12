@@ -28,7 +28,10 @@ Queue *CreateStringQueue(int size){
         exit(1);
     }
     // malloc each char *     
-   
+    for (int i=0; i<size; i++) {
+        q->strings[i] = malloc(sizeof(char)*4096);
+    }  
+ 
     // sychronization vars used in the structure
     sem_init(&(q->OKToDequeue), 0, 0); 
     sem_init(&(q->OKToEnqueue), 0, 10);
@@ -64,13 +67,11 @@ void EnqueueString(Queue *q, char *string) {
     if (sem_check==-1) {
 	printf("Error waiting to MEQueue\n");
     }
-    printf("about to enqueue\n"); 
+
     // enqueue
-    q->strings[0] = malloc(sizeof(char)*100);
-    q->strings[0] = string;
+    q->strings[q->curr_size] = string;
     q->enqueueCount++;
     q->curr_size++;    
-    printf("Enqueued a string\n");
 
     sem_check = sem_post(&(q->MEQueue));
     if (sem_check==-1) {
@@ -80,6 +81,8 @@ void EnqueueString(Queue *q, char *string) {
     if (sem_check==-1) {
 	printf("Error posting to OKToDequeue\n");
     }
+
+    printf("STRING ADDED: %s\n", string);
 
     time_t end_enqueue = time(NULL);
     q->enqueueTime = (long int) (end_enqueue - start_enqueue);
