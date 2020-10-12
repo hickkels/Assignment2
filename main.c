@@ -130,7 +130,7 @@ void* writer_function(void *queue_ptr) {
     char *outString;
     int count = 0;
 
-    printf("Output: \n");
+    //printf("Output: \n");
     
     // while the queue size is not exceeded
     while (munch2_to_writer->curr_size >= count)
