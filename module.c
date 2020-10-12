@@ -47,17 +47,23 @@ void EnqueueString(Queue *q, char *string) {
     printf("ENTERED ENQUEUE\n");
     // SHOULD THIS start before or after the wait?
     time_t start_enqueue = time(NULL);
-    
+
+    printf("after time\n");  
+  
     int sem_check; 
     sem_check = sem_wait(&(q->OKToEnqueue));
+    printf("a\n");
     if (sem_check==-1) {
         printf("Error waiting to OKToEnqueue\n");
     }
+    printf("a\n");
     sem_check = sem_wait(&(q->MEQueue));
+    printf("a\n");
     if (sem_check==-1) {
 	printf("Error waiting to MEQueue\n");
     }
-    
+   
+    printf("about to enqueue\n"); 
     // enqueue
     *((q->strings)+(q->curr_size)) = string;
     q->enqueueCount++;
