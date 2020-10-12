@@ -44,8 +44,6 @@ Queue *CreateStringQueue(int size){
 void EnqueueString(Queue *q, char *string) {
    // SHOULD THIS start before or after the wait?
     time_t start_enqueue = time(NULL);
-    sem_wait(q->OKToEnqueue);
-    sem_wait(q->MEQueue);
     
     int sem_check; 
     sem_check = sem_wait(&(q->OKToEnqueue));
@@ -93,7 +91,7 @@ char * DequeueString(Queue *q) {
     }
 
     // removes a pointer to a string from the beginning of queue q
-    char *rem_string_ptr = *(q->strings)[q->curr_size];
+    char *rem_string_ptr = *((q->strings)+(q->curr_size));
     *(q->strings)[q->curr_size] = NULL; // ??is this right
     q->curr_size--;
     q->dequeueCount++;
