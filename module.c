@@ -54,8 +54,9 @@ void EnqueueString(Queue *q, char *string) {
     if (sem_check==-1) {
 	printf("Error waiting to MEQueue\n");
     }
-
-    *(q->strings)[q->curr_size] = string;  // enqueue
+    
+    // enqueue
+    *((q->strings)+(q->curr_size)) = string;
     q->enqueueCount++;
     q->curr_size++;    
 
@@ -69,7 +70,7 @@ void EnqueueString(Queue *q, char *string) {
     }
 
     time_t end_enqueue = time(NULL);
-    q->enqueueTime = ("%.2f\n", (long int) (end_enqueue - start_enqueue));
+    q->enqueueTime = (long int) (end_enqueue - start_enqueue);
 }
 
 /*
@@ -92,7 +93,7 @@ char * DequeueString(Queue *q) {
 
     // removes a pointer to a string from the beginning of queue q
     char *rem_string_ptr = *((q->strings)+(q->curr_size));
-    *(q->strings)[q->curr_size] = NULL; // ??is this right
+    *((q->strings)+(q->curr_size)) = NULL;
     q->curr_size--;
     q->dequeueCount++;
 
@@ -106,7 +107,7 @@ char * DequeueString(Queue *q) {
     }
 
     time_t end_dequeue = time(NULL);    
-    q->dequeueTime = ("%.2f\n", (long int) (end_dequeue - start_dequeue));
+    q->dequeueTime = (long int) (end_dequeue - start_dequeue);
 
     return rem_string_ptr;
 }
