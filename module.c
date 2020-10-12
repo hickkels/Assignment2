@@ -30,7 +30,7 @@ Queue *CreateStringQueue(int size){
     // sychronization vars used in the structure
     sem_init(&(q->OKToDequeue), 0, 0); 
     sem_init(&(q->OKToEnqueue), 0, 10);
-    sem_init(&(q->MEQueue), 0, 1);
+    sem_init(&(q->MEQueue), 1, 1);
     
     // state vars used in the structure
     q->curr_size = 0;
