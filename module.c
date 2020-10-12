@@ -15,6 +15,7 @@
 */
 Queue *CreateStringQueue(int size){
 
+    printf("In create string queue\n");
     // malloc queue struct 
     Queue *q, q1;
     q = &q1; // not sure about this, leave it until testing
@@ -42,7 +43,9 @@ Queue *CreateStringQueue(int size){
 * If the queue is full, then this function blocks until there is space available
 */
 void EnqueueString(Queue *q, char *string) {
-   // SHOULD THIS start before or after the wait?
+    
+    printf("ENTERED ENQUEUE\n");
+    // SHOULD THIS start before or after the wait?
     time_t start_enqueue = time(NULL);
     
     int sem_check; 
@@ -59,6 +62,7 @@ void EnqueueString(Queue *q, char *string) {
     *((q->strings)+(q->curr_size)) = string;
     q->enqueueCount++;
     q->curr_size++;    
+    printf("Enqueued a string\n");
 
     sem_check = sem_post(&(q->MEQueue));
     if (sem_check==-1) {
@@ -79,6 +83,7 @@ void EnqueueString(Queue *q, char *string) {
 * Returns the pointer that was removed from the queue
 */
 char * DequeueString(Queue *q) {
+    printf("ENTERED DEQUEUE\n");
     time_t start_dequeue = time(NULL);
 
     int sem_check;
@@ -96,6 +101,7 @@ char * DequeueString(Queue *q) {
     *((q->strings)+(q->curr_size)) = NULL;
     q->curr_size--;
     q->dequeueCount++;
+    printf("Dequeued a string\n");
 
     sem_check = sem_post(&(q->MEQueue));
     if (sem_check==-1) {

@@ -21,8 +21,9 @@ struct Mult_args {
 * Reader will take the each line of the input and pass it to thread Munch1 through a queue of character strings
 */
 void* reader_function(void *queue_ptr) {
+    printf("entered reader function\n");
     Queue *reader_to_munch1 = (Queue *) queue_ptr; 
-    size_t  buff_size = 1024; // max size of buffer
+    size_t  buff_size = 4096; // max size of buffer
     size_t len = 0; // initial size of string
     char* string = NULL; // initial string set to NULL
     int ch; // character to be iterated and read in from stdin
@@ -30,20 +31,25 @@ void* reader_function(void *queue_ptr) {
 
     // while character iterated is not equal to the end of file character
     while (EOF != (ch = fgetc(stdin))) {
+        printf("inside while loop\n");
         // while character iterated is not the end of line character
         while ((ch = fgetc(stdin)) != '\n') {
+            printf("inside while loop\n");
+	    printf("%c\n", ch);
             string = malloc(buff_size * sizeof(char)); // allocate enough room for the string with the buffer size
             string[len++] = ch; // read in characters and set equal to corresponding position
             characters++; // increment character count of string
         }
         // if input line exceeds buffer size
         if (characters > buff_size) {
+	    printf("char %ld is greater than buff size %ld\n", characters, buff_size);
             fprintf(stderr, "Input line has exceeded buffer length."); // print error
             // flush to end of live any remaining characters on that line
             for (int i=buff_size; (size_t)i<characters; i++) { 
                 string[i] = '\0';
             }
         } else {
+	    printf("calling enqueue string\n");
             EnqueueString(reader_to_munch1, string); // pass line to queue
         } 
     }
@@ -55,7 +61,7 @@ void* reader_function(void *queue_ptr) {
 * It will then pass the line to thread Munch2 through another queue of character strings.
 */
 void* munch1_function(void *m1_args) {
-
+    printf("entered munch1 function\n");
     struct Mult_args *args = (struct Mult_args *)m1_args;
 
     // initialize queues used in munch1
@@ -88,6 +94,7 @@ void* munch1_function(void *m1_args) {
 */
 void* munch2_function(void *m2_args) {
     
+    printf("entered munch2 function\n");
     struct Mult_args *args = (struct Mult_args *)m2_args;
 
     // initialize queues used in munch2
@@ -120,6 +127,7 @@ void* munch2_function(void *m2_args) {
 
 /* Write line to standard output */
 void* writer_function(void *queue_ptr) {
+    printf("entered writer function\n");
     // when no more string to process, print queue statistics
     // print each string
 
@@ -171,23 +179,22 @@ void* writer_function(void *queue_ptr) {
     struct Mult_args m2_args;
     m2_args.arg1 = munch1_to_munch2;
     m2_args.arg2 = munch2_to_writer;
-    
+   
+    printf("initializing pthreads\n");
+ 
     // then create 4 pthreads using pthread_create 
     int read = -pthread_create(&Reader, NULL, &reader_function, (void *)(reader_to_munch1));
     int munch1 = -pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
     int munch2 = -pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
     int write = -pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
-    
+   
+    printf("initialized pthreads\n");
+ 
     // wait for these threads to finish by calling pthread_join
-    if (!read) 
-        pthread_join(Reader, NULL);
-    if (!munch1)
-        pthread_join(Munch1, NULL);
-    if (!munch2)
-        pthread_join(Munch2, NULL);
-    if (!write)
-        pthread_join(Writer, NULL);
-
+    if (!read) pthread_join(Reader, NULL);
+    if (!munch1) pthread_join(Munch1, NULL);
+    if (!munch2) pthread_join(Munch2, NULL);
+    if (!write) pthread_join(Writer, NULL);
   
     // for each queue, print statistics to stderr uding PrintQueueStats function
     printf("Queue statistics: \n");
