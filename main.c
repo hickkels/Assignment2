@@ -26,20 +26,22 @@ void* reader_function(void *queue_ptr) {
     size_t  buff_size = 4096; // max size of buffer
     size_t len = 0; // initial size of string
     char* string = NULL; // initial string set to NULL
-    int ch; // character to be iterated and read in from stdin
+    char ch; // character to be iterated and read in from stdin
     size_t characters = 0; // count of characters in string
-
+    
+    ch = (char) fgetc(stdin);
     // while character iterated is not equal to the end of file character
-    while (EOF != (ch = fgetc(stdin))) {
+    while (EOF != ch) {
         printf("inside while loop\n");
         // while character iterated is not the end of line character
-        while ((ch = fgetc(stdin)) != '\n') {
+        while (ch != '\n') {
             printf("inside while loop\n");
 	    printf("%c\n", ch);
             string = malloc(buff_size * sizeof(char)); // allocate enough room for the string with the buffer size
             string[len++] = ch; // read in characters and set equal to corresponding position
             characters++; // increment character count of string
-        }
+            ch = (char) fgetc(stdin);
+	}
         // if input line exceeds buffer size
         if (characters > buff_size) {
 	    printf("char %ld is greater than buff size %ld\n", characters, buff_size);
@@ -138,7 +140,7 @@ void* writer_function(void *queue_ptr) {
     char *outString;
     int count = 0;
 
-    //printf("Output: \n");
+    printf("Output: \n");
     
     // while the queue size is not exceeded
     while (munch2_to_writer->curr_size >= count)
@@ -184,17 +186,17 @@ void* writer_function(void *queue_ptr) {
  
     // then create 4 pthreads using pthread_create 
     int read = -pthread_create(&Reader, NULL, &reader_function, (void *)(reader_to_munch1));
-    int munch1 = -pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
-    int munch2 = -pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
-    int write = -pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
+    //int munch1 = -pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
+    //int munch2 = -pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
+    //int write = -pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
    
     printf("initialized pthreads\n");
  
     // wait for these threads to finish by calling pthread_join
     if (!read) pthread_join(Reader, NULL);
-    if (!munch1) pthread_join(Munch1, NULL);
-    if (!munch2) pthread_join(Munch2, NULL);
-    if (!write) pthread_join(Writer, NULL);
+    //if (!munch1) pthread_join(Munch1, NULL);
+    //if (!munch2) pthread_join(Munch2, NULL);
+    //if (!write) pthread_join(Writer, NULL);
   
     // for each queue, print statistics to stderr uding PrintQueueStats function
     printf("Queue statistics: \n");
