@@ -78,16 +78,18 @@ void* munch1_function(void *m1_args) {
     int count = 0;
 
     // while the queue size is not exceeded
-    while(reader_to_munch1->curr_size >= count) {
-        string = DequeueString(reader_to_munch1); // take out string and remove from queue
-	    strPtr = string; // set string pointer equal to string
-        // while there is a space character found in the string
-        while((strPtr = strchr (strPtr, sp)) != NULL) {
-            *strPtr++ = ast; // replace space character with asterik 
-        }
+    while(reader_to_munch1->curr_size > count) {
+	string = DequeueString(reader_to_munch1); // take out string and remove from queue
+	strPtr = string; // set string pointer equal to string
+    // while there is a space character found in the string
+	if (NULL!=strPtr) {
+	    while((strPtr = strchr (strPtr, sp)) != NULL) {
+                *strPtr++ = ast; // replace space character with asterik 
+            }
+	}
         EnqueueString(munch1_to_munch2, string); // pass new string to queue
         count++; // increment counter for queue size
-    }    
+    }
     pthread_exit(0);
 }
 
@@ -183,8 +185,8 @@ void* writer_function(void *queue_ptr) {
     // then create 4 pthreads using pthread_create 
     int read = pthread_create(&Reader, NULL, &reader_function, (void *)(reader_to_munch1));
     int munch1 = pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
-    // int munch2 = pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
-    // int write = pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
+    int munch2 = pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
+    //int write = pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
    
     // wait for these threads to finish by calling pthread_join
     if (!read) pthread_join(Reader, NULL);

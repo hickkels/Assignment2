@@ -7,6 +7,7 @@ typedef struct Queue
     int curr_size;
     int enqueueCount;
     int dequeueCount;
+    int next_dq;
     sem_t OKToEnqueue;
     sem_t OKToDequeue;
     sem_t MEQueue;
