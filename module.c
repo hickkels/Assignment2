@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <semaphore.h> 
 
 //NOTES:
 // should count empty lines: made up of two newline characters
@@ -18,16 +19,20 @@ Queue *CreateStringQueue(int size){
     printf("In create string queue\n");
     // malloc queue struct 
     Queue *q;
-    q = malloc(sizeof(Queue*));
-     
+    q = malloc(sizeof(Queue));
+ 
     // malloc the char ** array pointed to from that structure
     // not enough memory stored?
     q->strings = malloc(sizeof(char*)*size);
     if ((q->strings)==NULL) {
         printf("Error while allocating 2D char array\n");
         exit(1);
-    }     
-   
+    }
+    // malloc each char *     
+    for (int i=0; i<size; i++) {
+        q->strings[i] = malloc(sizeof(char)*4096);
+    }  
+ 
     // sychronization vars used in the structure
     sem_init(&(q->OKToDequeue), 0, 0); 
     sem_init(&(q->OKToEnqueue), 0, 10);
@@ -44,7 +49,7 @@ Queue *CreateStringQueue(int size){
 * If the queue is full, then this function blocks until there is space available
 */
 void EnqueueString(Queue *q, char *string) {
-    
+   
     printf("ENTERED ENQUEUE\n");
     // SHOULD THIS start before or after the wait?
     time_t start_enqueue = time(NULL);
@@ -57,20 +62,22 @@ void EnqueueString(Queue *q, char *string) {
     if (sem_check==-1) {
         printf("Error waiting to OKToEnqueue\n");
     }
-    printf("a\n");
+    printf("before MEQ\n");
     sem_check = sem_wait(&(q->MEQueue));
-    printf("a\n");
+    printf("after MEQ\n");
     if (sem_check==-1) {
 	printf("Error waiting to MEQueue\n");
     }
-   
-    printf("about to enqueue\n"); 
+
     // enqueue
+<<<<<<< HEAD
     q->strings[0] = &string;
     //*((q->strings)+(q->curr_size)) = string;
+=======
+    q->strings[q->curr_size] = string;
+>>>>>>> b56164a4dfe069d3d919729acfee4d93740610af
     q->enqueueCount++;
     q->curr_size++;    
-    printf("Enqueued a string\n");
 
     sem_check = sem_post(&(q->MEQueue));
     if (sem_check==-1) {
@@ -80,6 +87,8 @@ void EnqueueString(Queue *q, char *string) {
     if (sem_check==-1) {
 	printf("Error posting to OKToDequeue\n");
     }
+
+    printf("STRING ADDED: %s\n", string);
 
     time_t end_enqueue = time(NULL);
     q->enqueueTime = (long int) (end_enqueue - start_enqueue);
