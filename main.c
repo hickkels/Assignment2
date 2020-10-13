@@ -33,7 +33,7 @@ void* reader_function(void *queue_ptr) {
     
     ch = (char) fgetc(stdin);
     // while character iterated is not equal to the end of file character
-    while ('\n' != ch) {
+    while (EOF != ch) {
 	string = malloc(buff_size * sizeof(char)); // allocate enough room for the string with the buffer size
         // while character iterated is not the end of line character
         while ((ch != '\n') && (characters<buff_size)) {

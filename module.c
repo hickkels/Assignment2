@@ -66,18 +66,18 @@ void EnqueueString(Queue *q, char *string) {
 	printf("Error waiting to MEQueue\n");
     }
 
-    printf("ENTERING ENQUEUE MUTEX\n");
+//    printf("ENTERING ENQUEUE MUTEX\n");
     // enqueue
     q->strings[q->curr_size] = string;
     q->enqueueCount++;
     q->curr_size++;
     
-    printf("\n");
-    printf("-------enqueued: %s-------\n", string);
-    printf("curr_size = %d\n", q->curr_size);
-    printf("next_dq = %d\n", q->next_dq);
-    printf("--------------------------\n");
-    printf("\n");
+//    printf("\n");
+//    printf("-------enqueued: %s-------\n", string);
+//    printf("curr_size = %d\n", q->curr_size);
+//    printf("next_dq = %d\n", q->next_dq);
+//    printf("--------------------------\n");
+//    printf("\n");
 
     sem_check = sem_post(&(q->MEQueue));
     if (sem_check==-1) {
@@ -110,19 +110,19 @@ char * DequeueString(Queue *q) {
         printf("Error waiting to MEQueue\n");
     }
 
-    printf("ENTERING DEQUEUE MUTEX\n");
+//    printf("ENTERING DEQUEUE MUTEX\n");
     // removes a pointer to a string from the beginning of queue q
     char *rem_string_ptr = q->strings[q->next_dq];
     q->strings[q->next_dq] = NULL;
     q->next_dq++;
     q->dequeueCount++;
 
-    printf("\n");
-    printf("-------dequeued: %s-------\n", rem_string_ptr);
-    printf("curr_size = %d\n", q->curr_size);
-    printf("next_dq = %d\n", q->next_dq);
-    printf("--------------------------\n");
-    printf("\n");
+//    printf("\n");
+//    printf("-------dequeued: %s-------\n", rem_string_ptr);
+//    printf("curr_size = %d\n", q->curr_size);
+//    printf("next_dq = %d\n", q->next_dq);
+//    printf("--------------------------\n");
+//    printf("\n");
 
     sem_check = sem_post(&(q->MEQueue));
     if (sem_check==-1) {
