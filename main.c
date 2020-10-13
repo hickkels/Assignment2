@@ -54,6 +54,7 @@ void* reader_function(void *queue_ptr) {
 	characters = 0;
 	string = NULL;
     }
+    printf("END OF READER FXN\n");
     EnqueueString(reader_to_munch1, NULL);
     pthread_exit(0);
 }
@@ -73,7 +74,7 @@ void* munch1_function(void *m1_args) {
     char *strPtr;
 
     // while the queue size is not exceeded
-    while(reader_to_munch1->next_dq <= reader_to_munch1->curr_size) {
+    while(1) {
 	string = DequeueString(reader_to_munch1); // take out string and remove from queue
 	strPtr = string; // set string pointer equal to string
         // while there is a space character found in the string
@@ -132,7 +133,7 @@ void* writer_function(void *queue_ptr) {
     char *outString;
     
     // while the queue size is not exceeded
-    while (munch2_to_writer->next_dq <= munch2_to_writer->curr_size) {
+    while (1) {
         outString = DequeueString(munch2_to_writer); // take out string and remove from queue
 	if (NULL==outString) break; //break out of loop if null end marker if reached
         printf("%s\n", outString); // print string

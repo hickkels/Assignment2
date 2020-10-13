@@ -43,6 +43,7 @@ Queue *CreateStringQueue(int size, int max_buff){
     q->enqueueCount = 0;
     q->dequeueTime = 0;
     q->dequeueTime = 0;
+    q->size = size;
 
     return q;
 }
@@ -61,8 +62,18 @@ void EnqueueString(Queue *q, char *string) {
     // enqueue
     q->strings[q->curr_size] = string;
     q->enqueueCount++;
-    q->curr_size++;
-   
+    q->curr_size = (q->curr_size+1) % q->size;
+
+    printf("ENTERING ENQUEUE MUTEX\n");
+    printf("\n");
+    printf("-------enqueued: %s-------\n", string);
+    printf("curr_size = %d\n", q->curr_size);
+    printf("next_dq = %d\n", q->next_dq);
+    printf("--------------------------\n");
+    printf("\n");
+    printf("Leaving ENQUEUE MUTEX\n");  
+    PrintQueueStats(q);  
+
     sem_check( sem_post(&(q->MEQueue)) ); 
     sem_check( sem_post(&(q->OKToDequeue)) );
 
@@ -84,8 +95,18 @@ char * DequeueString(Queue *q) {
     // removes the first char * from string to return
     char *rem_string_ptr = q->strings[q->next_dq];
     q->strings[q->next_dq] = NULL;
-    q->next_dq++;
+    q->next_dq = (q->next_dq+1) % q->size;
     q->dequeueCount++;
+
+    printf("ENTERING DEQUEUE MUTEX\n");
+    printf("\n");
+    printf("-------dequeued: %s-------\n", rem_string_ptr);
+    printf("curr_size = %d\n", q->curr_size);
+    printf("next_dq = %d\n", q->next_dq);
+    printf("--------------------------\n");
+    printf("\n");
+    printf("Leaving deQUEUE MUTEX\n");
+    PrintQueueStats(q);
 
     sem_check( sem_post(&(q->MEQueue)) );
     sem_check( sem_post(&(q->OKToEnqueue)) ); 
