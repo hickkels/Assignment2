@@ -1,4 +1,3 @@
-#define _GNU_SOURCE
 #include "module.h"
 #include <stdio.h>
 #include <pthread.h>
@@ -21,6 +20,7 @@ Queue *CreateStringQueue(int size){
     q = malloc(sizeof(Queue));
  
     // malloc the char ** array pointed to from that structure
+    // not enough memory stored?
     q->strings = malloc(sizeof(char*)*size);
     if ((q->strings)==NULL) {
         printf("Error while allocating 2D char array\n");
@@ -34,7 +34,7 @@ Queue *CreateStringQueue(int size){
     // sychronization vars used in the structure
     sem_init(&(q->OKToDequeue), 0, 0); 
     sem_init(&(q->OKToEnqueue), 0, 10);
-    sem_init(&(q->MEQueue), 0, 1);
+    sem_init(&(q->MEQueue), 1, 1);
     
     // state vars used in the structure
     q->curr_size = 0;
@@ -71,7 +71,8 @@ void EnqueueString(Queue *q, char *string) {
     printf("%d\n", q->curr_size);
     q->strings[q->curr_size] = string;
     q->enqueueCount++;
-    q->curr_size++;    
+    q->curr_size++;
+    printf("cur size = \n", q->curr_size);    
     printf("-------enqueued: %s-------\n", string);
 
     sem_check = sem_post(&(q->MEQueue));

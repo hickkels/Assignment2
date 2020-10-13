@@ -29,7 +29,7 @@ void* reader_function(void *queue_ptr) {
     size_t len = 0; // initial size of string
     char* string = NULL; // initial string set to NULL
     char ch; // character to be iterated and read in from stdin
-    size_t characters = 0; // count of characters in string
+    size_t characters; // count of characters in string
     
     ch = (char) fgetc(stdin);
     // while character iterated is not equal to the end of file character
@@ -40,8 +40,7 @@ void* reader_function(void *queue_ptr) {
             string[len++] = ch; // read in characters and set equal to corresponding position
             characters++; // increment character count of string
             ch = (char) fgetc(stdin);
-	}
-
+	    }
         // if input line exceeds buffer size
         if ((characters==buff_size) && ('\n' != ch)) {
             fprintf(stderr, "Input line has exceeded buffer length.\n"); // print error
@@ -57,7 +56,7 @@ void* reader_function(void *queue_ptr) {
 	characters = 0;
 	string = NULL;
     }
-    EnqueueString(reader_to_munch1, NULL);
+    //EnqueueString(reader_to_munch1, NULL);
     pthread_exit(0);
 }
 
@@ -89,7 +88,7 @@ void* munch1_function(void *m1_args) {
 	printf("entered dequeue loop\n");
 	string = DequeueString(reader_to_munch1); // take out string and remove from queue
 	strPtr = string; // set string pointer equal to string
-        // while there is a space character found in the string
+    // while there is a space character found in the string
 	if (NULL!=strPtr) {
 	    while((strPtr = strchr (strPtr, sp)) != NULL) {
                 *strPtr++ = ast; // replace space character with asterik 
