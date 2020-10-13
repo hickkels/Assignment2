@@ -65,6 +65,7 @@ void* reader_function(void *queue_ptr) {
 * It will then pass the line to thread Munch2 through another queue of character strings.
 */
 void* munch1_function(void *m1_args) {
+    printf("entered dequeue\n");
     struct Mult_args *args = (struct Mult_args *)m1_args;
 
     // initialize queues used in munch1
@@ -78,8 +79,14 @@ void* munch1_function(void *m1_args) {
     char* strPtr;
     int count = 0;
 
+    printf("CURR SIZE: %d\n", reader_to_munch1->curr_size);
+    printf("COUNT: %d\n", count);
     // while the queue size is not exceeded
-    while(reader_to_munch1->curr_size > count) {
+    while(reader_to_munch1->curr_size >= count) {
+        printf("COUNT: %d\n", count);
+	printf("CURR SIZE: %d\n", reader_to_munch1->curr_size);
+
+	printf("entered dequeue loop\n");
 	string = DequeueString(reader_to_munch1); // take out string and remove from queue
 	strPtr = string; // set string pointer equal to string
         // while there is a space character found in the string
@@ -90,6 +97,9 @@ void* munch1_function(void *m1_args) {
 	}
         EnqueueString(munch1_to_munch2, string); // pass new string to queue
         count++; // increment counter for queue size
+	if (NULL==strPtr) break;
+        printf("!!COUNT: %d\n", count);
+        printf("!!CURR SIZE: %d\n", reader_to_munch1->curr_size);
     }
     pthread_exit(0);
 }
@@ -107,15 +117,20 @@ void* munch2_function(void *m2_args) {
     Queue *munch2_to_writer = (Queue *) (args->arg2);
     
     // initialize other variables used in munch2
-    int lower;
-    int upper;
+    int lower = 0;
+    int upper = 0;
     char *string;
     int count = 0;
 
+    printf("m1m2 CURR SIZE: %d\n", munch1_to_munch2->curr_size);
+    printf("m1m2 COUNT: %d\n", count);
+
     // while the queue size is not exceeded
     while (munch1_to_munch2->curr_size >= count) {
-        string = DequeueString(munch1_to_munch2); // take out string and remove from queue
-        // iterate through string
+        printf("lenababy\n");
+	string = DequeueString(munch1_to_munch2); // take out string and remove from queue
+        printf("hello\n");
+	// iterate through string
         for (int i=0; (size_t)i<strlen(string); i++) {
             lower = islower(string[i]); // find lower case character
             // if lower case character = true
@@ -126,6 +141,7 @@ void* munch2_function(void *m2_args) {
         }
         EnqueueString(munch2_to_writer, string); // pass new string to queue
         count++; // increment counter for queue size
+        if (NULL==string) break;
     }
     pthread_exit(0);
 }
@@ -192,7 +208,7 @@ void* writer_function(void *queue_ptr) {
     // wait for these threads to finish by calling pthread_join
     if (!read) pthread_join(Reader, NULL);
     if (!munch1) pthread_join(Munch1, NULL);
-    //if (!munch2) pthread_join(Munch2, NULL);
+    if (!munch2) pthread_join(Munch2, NULL);
     //if (!write) pthread_join(Writer, NULL);
   
     // for each queue, print statistics to stderr uding PrintQueueStats function
