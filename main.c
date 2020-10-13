@@ -24,31 +24,28 @@ static int QUEUE_SIZE = 10;
 * Reader will take the each line of the input and pass it to thread Munch1 through a queue of character strings
 */
 void* reader_function(void *queue_ptr) {
+    
     Queue *reader_to_munch1 = (Queue *) queue_ptr; 
-    size_t  buff_size = MAX_BUFF; // max size of buffer
     size_t len = 0; // initial size of string
-    char* string = NULL; // initial string set to NULL
+    char *string = NULL; // initial string set to NULL
     char ch; // character to be iterated and read in from stdin
     size_t characters = 0; // count of characters in string
     
     ch = (char) fgetc(stdin);
-    // while character iterated is not equal to the end of file character
     while (EOF != ch) {
-	string = malloc(buff_size * sizeof(char)); // allocate enough room for the string with the buffer size
+	string = malloc(MAX_BUFF * sizeof(char)); // allocate enough room for the string with the buffer size
         // while character iterated is not the end of line character
-        while ((ch != '\n') && (characters<buff_size)) {
+        while ((ch != '\n') && (characters<MAX_BUFF)) {
             string[len++] = ch; // read in characters and set equal to corresponding position
             characters++; // increment character count of string
             ch = (char) fgetc(stdin);
 	}
 
         // if input line exceeds buffer size
-        if ((characters==buff_size) && ('\n' != ch)) {
+        if ((characters==MAX_BUFF) && ('\n' != ch)) {
             fprintf(stderr, "Input line has exceeded buffer length.\n"); // print error
             // flush to end of live any remaining characters on that line
-	    while ('\n' != ch) {
-		ch = (char) fgetc(stdin);
-	    }
+	    while ('\n' != ch) ch = (char) fgetc(stdin);
         } else {
             EnqueueString(reader_to_munch1, string); // pass line to queue
         }
@@ -65,17 +62,15 @@ void* reader_function(void *queue_ptr) {
 * It will then pass the line to thread Munch2 through another queue of character strings.
 */
 void* munch1_function(void *m1_args) {
+    
     struct Mult_args *args = (struct Mult_args *)m1_args;
-
-    // initialize queues used in munch1
     Queue *reader_to_munch1 = (Queue *) args->arg1; 
     Queue *munch1_to_munch2 = (Queue *) args->arg2;
 
-    // initialize other variables used in munch1
     char sp = ' ';
     char ast = '*';
-    char* string;
-    char* strPtr;
+    char *string;
+    char *strPtr;
 
     // while the queue size is not exceeded
     while(reader_to_munch1->next_dq <= reader_to_munch1->curr_size) {
@@ -88,7 +83,7 @@ void* munch1_function(void *m1_args) {
             }
 	}
         EnqueueString(munch1_to_munch2, string); // pass new string to queue
-	if (NULL==string) break;
+	if (NULL==string) break; //break out of loop if null end marker if reached
     }
     pthread_exit(0);
 }
@@ -98,7 +93,7 @@ void* munch1_function(void *m1_args) {
 */
 void* munch2_function(void *m2_args) {
     
-    struct Mult_args *args = (struct Mult_args *)m2_args;
+    struct Mult_args *args = (struct Mult_args *) m2_args;
 
     // initialize queues used in munch2
     Queue *munch1_to_munch2 = (Queue *) (args->arg1);
@@ -125,7 +120,7 @@ void* munch2_function(void *m2_args) {
             }
 	}
         EnqueueString(munch2_to_writer, string); // pass new string to queue
-        if (NULL==string) break;
+        if (NULL==string) break; //break out of loop if null end marker if reached
     }
     pthread_exit(0);
 }
@@ -133,17 +128,13 @@ void* munch2_function(void *m2_args) {
 /* Write line to standard output */
 void* writer_function(void *queue_ptr) {
 
-    // initialize queue used in writer
     Queue *munch2_to_writer = (Queue *) queue_ptr;
-
-    // initialize other variables used in munch
     char *outString;
     
     // while the queue size is not exceeded
-    while (munch2_to_writer->next_dq <= munch2_to_writer->curr_size)
-    {
+    while (munch2_to_writer->next_dq <= munch2_to_writer->curr_size) {
         outString = DequeueString(munch2_to_writer); // take out string and remove from queue
-	if (NULL==outString) break;
+	if (NULL==outString) break; //break out of loop if null end marker if reached
         printf("%s\n", outString); // print string
     }
     pthread_exit(0);
@@ -157,13 +148,11 @@ void* writer_function(void *queue_ptr) {
  int main() {
     
     // first create three queues, will return a pointer to the queue
-    // make queue size 10 for testing purposes
-    Queue *reader_to_munch1 = CreateStringQueue(QUEUE_SIZE); 
-    Queue *munch1_to_munch2 = CreateStringQueue(QUEUE_SIZE);
-    Queue *munch2_to_writer = CreateStringQueue(QUEUE_SIZE);
+    Queue *reader_to_munch1 = CreateStringQueue(QUEUE_SIZE, MAX_BUFF); 
+    Queue *munch1_to_munch2 = CreateStringQueue(QUEUE_SIZE, MAX_BUFF);
+    Queue *munch2_to_writer = CreateStringQueue(QUEUE_SIZE, MAX_BUFF);
   
-    // then create 4 pthreads using pthread_create
-    // each has its own id
+    // then create 4 pthreads using pthread_create, each has its own id
     pthread_t Reader;
     pthread_t Writer;
     pthread_t Munch1;

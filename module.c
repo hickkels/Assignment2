@@ -6,35 +6,35 @@
 #include <stdlib.h>
 #include <semaphore.h> 
 
-//NOTES:
-// should count empty lines: made up of two newline characters
-
 /*
 * Dynamically allocate a new Queue structure and initialize it with an array of character points of length size
 * Returns a pointer to the new queue structure
 */
-Queue *CreateStringQueue(int size){
+Queue *CreateStringQueue(int size, int max_buff){
 
     // malloc queue struct 
     Queue *q;
     q = malloc(sizeof(Queue));
  
-    // malloc the char ** array pointed to from that structure
-    // not enough memory stored?
+    // malloc the char ** array
     q->strings = malloc(sizeof(char*)*size);
-    if ((q->strings)==NULL) {
+    if (q->strings==NULL) {
         printf("Error while allocating 2D char array\n");
         exit(1);
     }
     // malloc each char *     
     for (int i=0; i<size; i++) {
-        q->strings[i] = malloc(sizeof(char)*4096);
+        q->strings[i] = malloc(sizeof(char)*max_buff);
+	if (q->strings[i]==NULL) {
+	    printf("Error while allocating char pointer\n");
+	    exit(1);
+	}
     }  
  
     // sychronization vars used in the structure
     sem_init(&(q->OKToDequeue), 0, 0); 
     sem_init(&(q->OKToEnqueue), 0, 10);
-    sem_init(&(q->MEQueue), 1, 1);
+    sem_init(&(q->MEQueue), 0, 1);
     
     // state vars used in the structure
     q->curr_size = 0;
@@ -53,40 +53,18 @@ Queue *CreateStringQueue(int size){
 */
 void EnqueueString(Queue *q, char *string) {
    
-    // SHOULD THIS start before or after the wait?
     time_t start_enqueue = time(NULL);
   
-    int sem_check; 
-    sem_check = sem_wait(&(q->OKToEnqueue));
-    if (sem_check==-1) {
-        printf("Error waiting to OKToEnqueue\n");
-    }
-    sem_check = sem_wait(&(q->MEQueue));
-    if (sem_check==-1) {
-	printf("Error waiting to MEQueue\n");
-    }
+    sem_check( sem_wait(&(q->OKToEnqueue)) );
+    sem_check( sem_wait(&(q->MEQueue)) );
 
-//    printf("ENTERING ENQUEUE MUTEX\n");
     // enqueue
     q->strings[q->curr_size] = string;
     q->enqueueCount++;
     q->curr_size++;
-    
-//    printf("\n");
-//    printf("-------enqueued: %s-------\n", string);
-//    printf("curr_size = %d\n", q->curr_size);
-//    printf("next_dq = %d\n", q->next_dq);
-//    printf("--------------------------\n");
-//    printf("\n");
-
-    sem_check = sem_post(&(q->MEQueue));
-    if (sem_check==-1) {
-        printf("Error posting to MEQueue\n");
-    }
-    sem_check = sem_post(&(q->OKToDequeue));
-    if (sem_check==-1) {
-	printf("Error posting to OKToDequeue\n");
-    }
+   
+    sem_check( sem_post(&(q->MEQueue)) ); 
+    sem_check( sem_post(&(q->OKToDequeue)) );
 
     time_t end_enqueue = time(NULL);
     q->enqueueTime = (long int) (end_enqueue - start_enqueue);
@@ -100,43 +78,29 @@ void EnqueueString(Queue *q, char *string) {
 char * DequeueString(Queue *q) {
     time_t start_dequeue = time(NULL);
 
-    int sem_check;
-    sem_check = sem_wait(&(q->OKToDequeue));
-    if (sem_check==-1) {
-        printf("Error waiting to OKToDequeue\n");
-    }
-    sem_check = sem_wait(&(q->MEQueue));    
-    if (sem_check==-1) {
-        printf("Error waiting to MEQueue\n");
-    }
+    sem_check( sem_wait(&(q->OKToDequeue)) );
+    sem_check( sem_wait(&(q->MEQueue)) );    
 
-//    printf("ENTERING DEQUEUE MUTEX\n");
-    // removes a pointer to a string from the beginning of queue q
+    // removes the first char * from string to return
     char *rem_string_ptr = q->strings[q->next_dq];
     q->strings[q->next_dq] = NULL;
     q->next_dq++;
     q->dequeueCount++;
 
-//    printf("\n");
-//    printf("-------dequeued: %s-------\n", rem_string_ptr);
-//    printf("curr_size = %d\n", q->curr_size);
-//    printf("next_dq = %d\n", q->next_dq);
-//    printf("--------------------------\n");
-//    printf("\n");
-
-    sem_check = sem_post(&(q->MEQueue));
-    if (sem_check==-1) {
-        printf("Error posting to MEQueue\n");
-    }
-    sem_check = sem_post(&(q->OKToEnqueue)); 
-    if (sem_check==-1) {
-        printf("Error posting to OKToEnqueue\n");
-    }
+    sem_check( sem_post(&(q->MEQueue)) );
+    sem_check( sem_post(&(q->OKToEnqueue)) ); 
 
     time_t end_dequeue = time(NULL);    
     q->dequeueTime = (long int) (end_dequeue - start_dequeue);
 
     return rem_string_ptr;
+}
+
+void sem_check(int sem_return_val) {
+    if(sem_return_val==-1) {
+	printf("Semaphore error.\n");
+	exit(1);
+    }
 }
 
 /* 
