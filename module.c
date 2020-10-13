@@ -15,43 +15,35 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
 * Dynamically allocate a new Queue structure and initialize it with an array of character points of length size
 * Returns a pointer to the new queue structure
 */
-Queue *CreateStringQueue(int size, int max_buff){
+Queue *CreateStringQueue(int size){
 
     // malloc queue struct 
     Queue *q;
     q = malloc(sizeof(Queue));
+    if (NULL==q) {
+	fprintf(stderr,"Error while allocating queue\n");
+        exit(1);
+    }
 
     // malloc char ** array
     q->strings = malloc(sizeof(char*)*size);    
     if (q->strings==NULL) {
-        printf("Error while allocating 2D char array\n");
+        fprintf(stderr,"Error while allocating 2D char array\n");
         exit(1);
     }
 
-    // malloc each char *     
-    for (int i=0; i<size; i++) {
-        q->strings[i] = malloc(sizeof(char)*max_buff);
-    	if (q->strings[i]==NULL) {
-	        printf("Error while allocating char pointer\n");
-	        exit(1);
-	    }
-    }  
- 
     // sychronization vars used in the structure
-    sem_init(&(q->OKToDequeue), 0, 0); 
-    sem_init(&(q->OKToEnqueue), 0, 10);
-    sem_init(&(q->MEQueue), 0, 1);
+    sem_check( sem_init(&(q->OKToDequeue), 0, 0) ); 
+    sem_check( sem_init(&(q->OKToEnqueue), 0, 10) );
+    sem_check( sem_init(&(q->MEQueue), 0, 1) );
     
     // state vars used in the structure
     q->curr_size = 0;
     q->next_dq = 0;
     q->enqueueCount = -1;
     q->dequeueCount = -1;
-//    q->enqueueTime = 0;
-//    q->dequeueTime = 0;
     q->size = size;
 
-    // return the queue and its respective fields
     return q;
 }
 
@@ -122,7 +114,7 @@ char * DequeueString(Queue *q) {
 */
 void sem_check(int sem_return_val) {
     if(sem_return_val==-1) {
-	    printf("Semaphore error.\n");
+	    fprintf(stderr,"Semaphore error.\n");
 	    exit(1);
     }
 }
@@ -131,9 +123,9 @@ void sem_check(int sem_return_val) {
 * Prints the statistics for this queue
 */
 void PrintQueueStats(Queue *q) {
-    printf("Enqueue count: %d\n", q->enqueueCount);
-    printf("Dequeue count: %d\n", q->dequeueCount);
-    printf("Enqueue time: %.6f\n", q->enqueueTime);
-    printf("Dequeue time: %.6f\n", q->dequeueTime);
+    fprintf(stderr,"Enqueue count: %d\n", q->enqueueCount);
+    fprintf(stderr,"Dequeue count: %d\n", q->dequeueCount);
+    fprintf(stderr,"Enqueue time: %.6f\n", q->enqueueTime);
+    fprintf(stderr,"Dequeue time: %.6f\n", q->dequeueTime);
 }
 

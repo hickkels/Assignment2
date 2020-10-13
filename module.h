@@ -9,8 +9,6 @@ Kelsey Hickok: khickok@wisc.edu, 9076435016
 typedef struct Queue
 {
     int curr_size;
-    int first;
-    int last;
     int enqueueCount;
     int dequeueCount;
     int next_dq;
@@ -23,7 +21,7 @@ typedef struct Queue
     char **strings;
 } Queue;
 
-Queue *CreateStringQueue(int size, int max_buff);
+Queue *CreateStringQueue(int size);
 void EnqueueString(Queue *q, char *string);
 char * DequeueString(Queue *q);
 void PrintQueueStats(Queue *q);

@@ -34,7 +34,11 @@ void* reader_function(void *queue_ptr) {
     ch = (char) fgetc(stdin);
     while (EOF != ch) {
 	string = malloc(MAX_BUFF * sizeof(char)); // allocate enough room for the string with the buffer size
-        // while character iterated is not the end of line character
+        if (NULL==string) {
+	    fprintf(stderr,"Error mallocing buffer.\n");
+            exit(1);
+	}
+	// while character iterated is not the end of line character
         while ((ch != '\n') && (characters<MAX_BUFF)) {
             string[len++] = ch; // read in characters and set equal to corresponding position
             characters++; // increment character count of string
@@ -105,7 +109,7 @@ void* munch2_function(void *m2_args) {
     char *string;
 
     // while the queue size is not exceeded
-    while (munch1_to_munch2->first <= munch1_to_munch2->last) {
+    while (1) {
 	
 	string = DequeueString(munch1_to_munch2); // take out string and remove from queue
         // iterate through string
@@ -130,14 +134,17 @@ void* writer_function(void *queue_ptr) {
 
     Queue *munch2_to_writer = (Queue *) queue_ptr;
     char *outString;
+    int count = 0;
     
     // while the queue size is not exceeded
     while (1) {
         outString = DequeueString(munch2_to_writer); // take out string and remove from queue
-    if (NULL==outString) break; //break out of loop if null end marker if reached
+    	if (NULL==outString) break; //break out of loop if null end marker if reached
         printf("%s\n", outString); // print string
-        free(outString);
+        count++;
+	free(outString);
     }
+    printf("Total strings processed: %d\n", count);
     pthread_exit(0);
 }
 
@@ -149,9 +156,9 @@ void* writer_function(void *queue_ptr) {
  int main() {
     
     // first create three queues, will return a pointer to the queue
-    Queue *reader_to_munch1 = CreateStringQueue(QUEUE_SIZE, MAX_BUFF); 
-    Queue *munch1_to_munch2 = CreateStringQueue(QUEUE_SIZE, MAX_BUFF);
-    Queue *munch2_to_writer = CreateStringQueue(QUEUE_SIZE, MAX_BUFF);
+    Queue *reader_to_munch1 = CreateStringQueue(QUEUE_SIZE); 
+    Queue *munch1_to_munch2 = CreateStringQueue(QUEUE_SIZE);
+    Queue *munch2_to_writer = CreateStringQueue(QUEUE_SIZE);
   
     // then create 4 pthreads using pthread_create, each has its own id
     pthread_t Reader;
@@ -180,11 +187,11 @@ void* writer_function(void *queue_ptr) {
     if (!write) pthread_join(Writer, NULL);
  
     // for each queue, print statistics to stderr uding PrintQueueStats function
-    printf("Reader to Munch1 statistics: \n");
+    fprintf(stderr,"Reader to Munch1 statistics: \n");
     PrintQueueStats(reader_to_munch1);
-    printf("Munch1 to Munch2 statistics: \n");
+    fprintf(stderr,"Munch1 to Munch2 statistics: \n");
     PrintQueueStats(munch1_to_munch2);
-    printf("Munch2 to Writer statistics: \n");
+    fprintf(stderr,"Munch2 to Writer statistics: \n");
     PrintQueueStats(munch2_to_writer);
     pthread_exit(0);
 }
