@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+ 25     q->strings = malloc(sizeof(char*)*size);#define _GNU_SOURCE
 #include "module.h"
 #include <stdio.h>
 #include <pthread.h>
@@ -17,10 +17,11 @@ Queue *CreateStringQueue(int size){
 
     printf("In create string queue\n");
     // malloc queue struct 
-    Queue *q, q1;
-    q = &q1; // not sure about this, leave it until testing
- 
+    Queue *q;
+    q = malloc(sizeof(Queue*));
+     
     // malloc the char ** array pointed to from that structure
+    // not enough memory stored?
     q->strings = malloc(sizeof(char*)*size);
     if ((q->strings)==NULL) {
         printf("Error while allocating 2D char array\n");
@@ -65,7 +66,8 @@ void EnqueueString(Queue *q, char *string) {
    
     printf("about to enqueue\n"); 
     // enqueue
-    *((q->strings)+(q->curr_size)) = string;
+    q->strings[0] = &string;
+    //*((q->strings)+(q->curr_size)) = string;
     q->enqueueCount++;
     q->curr_size++;    
     printf("Enqueued a string\n");

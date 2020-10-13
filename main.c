@@ -17,6 +17,7 @@ struct Mult_args {
     Queue *arg2;
 };
 
+
 /* Read from standard input, one line at a time. 
 * Reader will take the each line of the input and pass it to thread Munch1 through a queue of character strings
 */
@@ -27,21 +28,22 @@ void* reader_function(void *queue_ptr) {
     size_t len = 0; // initial size of string
     char* string = NULL; // initial string set to NULL
     char ch; // character to be iterated and read in from stdin
-    size_t characters = 0; // count of characters in string
+    size_t characters; // count of characters in string
     
     ch = (char) fgetc(stdin);
     // while character iterated is not equal to the end of file character
     while (EOF != ch) {
         printf("inside while loop\n");
         // while character iterated is not the end of line character
+        characters = 0; // initialize
+        string = malloc(buff_size * sizeof(char)); // allocate enough room for the string with the buffer size
         while (ch != '\n') {
             printf("inside while loop\n");
-	    printf("%c\n", ch);
-            string = malloc(buff_size * sizeof(char)); // allocate enough room for the string with the buffer size
+	        printf("%c\n", ch);
             string[len++] = ch; // read in characters and set equal to corresponding position
             characters++; // increment character count of string
             ch = (char) fgetc(stdin);
-	}
+	    }
         // if input line exceeds buffer size
         if (characters > buff_size) {
 	    printf("char %ld is greater than buff size %ld\n", characters, buff_size);
@@ -55,7 +57,7 @@ void* reader_function(void *queue_ptr) {
             EnqueueString(reader_to_munch1, string); // pass line to queue
         } 
     }
-    EnqueueString(reader_to_munch1, NULL);
+    //EnqueueString(reader_to_munch1, NULL);
     pthread_exit(0);
 }
 
@@ -185,10 +187,10 @@ void* writer_function(void *queue_ptr) {
     printf("initializing pthreads\n");
  
     // then create 4 pthreads using pthread_create 
-    int read = -pthread_create(&Reader, NULL, &reader_function, (void *)(reader_to_munch1));
-    //int munch1 = -pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
-    //int munch2 = -pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
-    //int write = -pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
+    int read = pthread_create(&Reader, NULL, &reader_function, (void *)(reader_to_munch1));
+    //int munch1 = pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
+    //int munch2 = pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
+    //int write = pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
    
     printf("initialized pthreads\n");
  
