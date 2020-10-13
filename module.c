@@ -1,4 +1,3 @@
- 25     q->strings = malloc(sizeof(char*)*size);#define _GNU_SOURCE
 #include "module.h"
 #include <stdio.h>
 #include <pthread.h>
