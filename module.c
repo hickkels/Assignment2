@@ -38,6 +38,11 @@ Queue *CreateStringQueue(int size){
     
     // state vars used in the structure
     q->curr_size = 0;
+    q->next_dq = 0;
+    q->enqueueCount = 0;
+    q->enqueueCount = 0;
+    q->dequeueTime = 0;
+    q->dequeueTime = 0;
 
     return q;
 }
@@ -63,6 +68,7 @@ void EnqueueString(Queue *q, char *string) {
 
     printf("ENTERING ENQUEUE MUTEX\n");
     // enqueue
+    printf("%d\n", q->curr_size);
     q->strings[q->curr_size] = string;
     q->enqueueCount++;
     q->curr_size++;    
@@ -101,9 +107,9 @@ char * DequeueString(Queue *q) {
 
     printf("ENTERING DEQUEUE MUTEX\n");
     // removes a pointer to a string from the beginning of queue q
-    char *rem_string_ptr = q->strings[q->curr_size];
-    q->strings[q->curr_size] = NULL;
-    q->curr_size--;
+    char *rem_string_ptr = q->strings[q->next_dq];
+    q->strings[q->next_dq] = NULL;
+    q->next_dq++;
     q->dequeueCount++;
     printf("-------dequeued: %s-------\n", rem_string_ptr);
 
