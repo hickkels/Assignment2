@@ -73,7 +73,7 @@ void* munch1_function(void *m1_args) {
     char *strPtr;
 
     // while the queue size is not exceeded
-    while(reader_to_munch1->first <= reader_to_munch1->last) {
+    while(1) {
 	string = DequeueString(reader_to_munch1); // take out string and remove from queue
 	strPtr = string; // set string pointer equal to string
         // while there is a space character found in the string
@@ -132,7 +132,7 @@ void* writer_function(void *queue_ptr) {
     char *outString;
     
     // while the queue size is not exceeded
-    while (munch2_to_writer->first <= munch2_to_writer->last) {
+    while (1) {
         outString = DequeueString(munch2_to_writer); // take out string and remove from queue
     if (NULL==outString) break; //break out of loop if null end marker if reached
         printf("%s\n", outString); // print string
@@ -166,7 +166,7 @@ void* writer_function(void *queue_ptr) {
     struct Mult_args m2_args;
     m2_args.arg1 = munch1_to_munch2;
     m2_args.arg2 = munch2_to_writer;
-   
+  
     // then create 4 pthreads using pthread_create 
     int read = pthread_create(&Reader, NULL, &reader_function, (void *)(reader_to_munch1));
     int munch1 = pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
