@@ -16,9 +16,10 @@ typedef struct Queue
     char **strings;
 } Queue;
 
-Queue *CreateStringQueue(int size);
+Queue *CreateStringQueue(int size, int max_buff);
 void EnqueueString(Queue *q, char *string);
 char * DequeueString(Queue *q);
 void PrintQueueStats(Queue *q);
+void sem_check(int sem_return_val);
 
 #endif
