@@ -65,7 +65,6 @@ void* reader_function(void *queue_ptr) {
 * It will then pass the line to thread Munch2 through another queue of character strings.
 */
 void* munch1_function(void *m1_args) {
-    printf("entered dequeue\n");
     struct Mult_args *args = (struct Mult_args *)m1_args;
 
     // initialize queues used in munch1
@@ -79,14 +78,8 @@ void* munch1_function(void *m1_args) {
     char* strPtr;
     int count = 0;
 
-    printf("CURR SIZE: %d\n", reader_to_munch1->curr_size);
-    printf("COUNT: %d\n", count);
     // while the queue size is not exceeded
     while(reader_to_munch1->next_dq <= reader_to_munch1->curr_size) {
-        printf("COUNT: %d\n", count);
-	printf("CURR SIZE: %d\n", reader_to_munch1->curr_size);
-
-	printf("entered dequeue loop\n");
 	string = DequeueString(reader_to_munch1); // take out string and remove from queue
 	strPtr = string; // set string pointer equal to string
         // while there is a space character found in the string
@@ -97,12 +90,8 @@ void* munch1_function(void *m1_args) {
 	}
         EnqueueString(munch1_to_munch2, string); // pass new string to queue
         count++; // increment counter for queue size
-	printf("!!COUNT: %d\n", count);
 	if (NULL==string) break;
-        printf("!!COUNT: %d\n", count);
-        printf("!!CURR SIZE: %d\n", reader_to_munch1->curr_size);
     }
-    EnqueueString(munch1_to_munch2, NULL);
     pthread_exit(0);
 }
 
@@ -111,7 +100,6 @@ void* munch1_function(void *m1_args) {
 */
 void* munch2_function(void *m2_args) {
     
-    printf("entered munch2 function\n");
     struct Mult_args *args = (struct Mult_args *)m2_args;
 
     // initialize queues used in munch2
@@ -124,13 +112,10 @@ void* munch2_function(void *m2_args) {
     char *string;
     int count = 0;
 
-    printf("m1m2 CURR SIZE: %d\n", munch1_to_munch2->curr_size);
-    printf("m1m2 COUNT: %d\n", count);
-
     // while the queue size is not exceeded
-    while (munch1_to_munch2->curr_size >= count) {
+    while (munch1_to_munch2->next_dq <= munch1_to_munch2->curr_size) {
+	
 	string = DequeueString(munch1_to_munch2); // take out string and remove from queue
-        printf("hello\n");
 	// iterate through string
         for (int i=0; (size_t)i<strlen(string); i++) {
             lower = islower(string[i]); // find lower case character
@@ -144,7 +129,7 @@ void* munch2_function(void *m2_args) {
         count++; // increment counter for queue size
         if (NULL==string) break;
     }
-    EnqueueString(munch2_to_writer, NULL);
+    printf("lalala\n");
     pthread_exit(0);
 }
 
