@@ -76,7 +76,6 @@ void* munch1_function(void *m1_args) {
     char ast = '*';
     char* string;
     char* strPtr;
-    int count = 0;
 
     // while the queue size is not exceeded
     while(reader_to_munch1->next_dq <= reader_to_munch1->curr_size) {
@@ -89,7 +88,6 @@ void* munch1_function(void *m1_args) {
             }
 	}
         EnqueueString(munch1_to_munch2, string); // pass new string to queue
-        count++; // increment counter for queue size
 	if (NULL==string) break;
     }
     pthread_exit(0);
@@ -110,26 +108,25 @@ void* munch2_function(void *m2_args) {
     int lower = 0;
     int upper = 0;
     char *string;
-    int count = 0;
 
     // while the queue size is not exceeded
     while (munch1_to_munch2->next_dq <= munch1_to_munch2->curr_size) {
 	
 	string = DequeueString(munch1_to_munch2); // take out string and remove from queue
-	// iterate through string
-        for (int i=0; (size_t)i<strlen(string); i++) {
-            lower = islower(string[i]); // find lower case character
-            // if lower case character = true
-            if (lower > 0) {
-                upper = toupper(string[i]); // change character to uppercase
-                string[i] = upper; // update in ptr
+        // iterate through string
+	if (NULL!=string) {
+            for (int i=0; (size_t)i<strlen(string); i++) {
+                lower = islower(string[i]); // find lower case character
+                // if lower case character = true
+                if (lower > 0) {
+                    upper = toupper(string[i]); // change character to uppercase
+                    string[i] = upper; // update in ptr
+                }
             }
-        }
+	}
         EnqueueString(munch2_to_writer, string); // pass new string to queue
-        count++; // increment counter for queue size
         if (NULL==string) break;
     }
-    printf("lalala\n");
     pthread_exit(0);
 }
 
