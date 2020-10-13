@@ -5,7 +5,9 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <semaphore.h> 
+#include <sys/time.h>
 
+const int QUEUE_SIZE = 10;
 /*
 * Dynamically allocate a new Queue structure and initialize it with an array of character points of length size
 * Returns a pointer to the new queue structure
@@ -13,8 +15,7 @@
 Queue *CreateStringQueue(int size, int max_buff){
 
     // malloc queue struct 
-    Queue *q;
-    q = malloc(sizeof(Queue));
+    Queue *q =  malloc(sizeof(*q));
  
     // malloc the char ** array
     q->strings = malloc(sizeof(char*)*size);
@@ -40,10 +41,10 @@ Queue *CreateStringQueue(int size, int max_buff){
     q->curr_size = 0;
     q->next_dq = 0;
     q->enqueueCount = 0;
-    q->enqueueCount = 0;
-    q->dequeueTime = 0;
-    q->dequeueTime = 0;
-
+    q->dequeueCount = 0;
+    q->first = 0;
+    q->last = 0;
+    
     return q;
 }
 
@@ -52,22 +53,26 @@ Queue *CreateStringQueue(int size, int max_buff){
 * If the queue is full, then this function blocks until there is space available
 */
 void EnqueueString(Queue *q, char *string) {
-   
-    time_t start_enqueue = time(NULL);
-  
+    
+    struct timeval startEnq, endEnq;  
+    
+    gettimeofday(&startEnq, 0);
+    
     sem_check( sem_wait(&(q->OKToEnqueue)) );
     sem_check( sem_wait(&(q->MEQueue)) );
 
     // enqueue
-    q->strings[q->curr_size] = string;
+    q->strings[q->last] = string;
     q->enqueueCount++;
     q->curr_size++;
-   
+    q->last = ModIncr(q->last);
     sem_check( sem_post(&(q->MEQueue)) ); 
     sem_check( sem_post(&(q->OKToDequeue)) );
 
-    time_t end_enqueue = time(NULL);
-    q->enqueueTime = (long int) (end_enqueue - start_enqueue);
+    gettimeofday(&endEnq, 0);
+    long secondsEnq = endEnq.tv_sec - startEnq.tv_sec;
+    long microsecondsEnq = endEnq.tv_usec - startEnq.tv_usec;
+    q->enqueueTime = secondsEnq + microsecondsEnq*1e-6;
 }
 
 /*
@@ -76,24 +81,31 @@ void EnqueueString(Queue *q, char *string) {
 * Returns the pointer that was removed from the queue
 */
 char * DequeueString(Queue *q) {
-    time_t start_dequeue = time(NULL);
+    struct timeval startDeq, endDeq;
+
+    gettimeofday(&startDeq, 0);
 
     sem_check( sem_wait(&(q->OKToDequeue)) );
     sem_check( sem_wait(&(q->MEQueue)) );    
 
     // removes the first char * from string to return
-    char *rem_string_ptr = q->strings[q->next_dq];
-    q->strings[q->next_dq] = NULL;
+    char *rem_string_ptr = q->strings[q->first];
+    q->strings[q->first] = NULL;
     q->next_dq++;
     q->dequeueCount++;
-
+    q->first = ModIncr(q->first);
     sem_check( sem_post(&(q->MEQueue)) );
     sem_check( sem_post(&(q->OKToEnqueue)) ); 
 
-    time_t end_dequeue = time(NULL);    
-    q->dequeueTime = (long int) (end_dequeue - start_dequeue);
-
+    gettimeofday(&endDeq, 0);
+    long secondsDeq = endDeq.tv_sec - startDeq.tv_sec;
+    long microsecondsDeq = endDeq.tv_usec - startDeq.tv_usec;
+    q->dequeueTime = secondsDeq + microsecondsDeq*1e-6;
     return rem_string_ptr;
+}
+
+int ModIncr(int v) {
+     return (v+1)%QUEUE_SIZE;
 }
 
 void sem_check(int sem_return_val) {
@@ -109,7 +121,7 @@ void sem_check(int sem_return_val) {
 void PrintQueueStats(Queue *q) {
     printf("Enqueue count: %d\n", q->enqueueCount);
     printf("Dequeue count: %d\n", q->dequeueCount);
-    printf("Enqueue time: %.2ld\n", q->enqueueTime);
-    printf("Dequeue time: %.2ld\n", q->dequeueTime);
+    printf("Enqueue time: %.6f\n", q->enqueueTime);
+    printf("Dequeue time: %.6f\n", q->dequeueTime);
 }
 
