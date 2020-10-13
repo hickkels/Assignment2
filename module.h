@@ -1,3 +1,7 @@
+/*
+Cecelia Peterson: cpeterson36@wisc.edu, 9073157274
+Kelsey Hickok: khickok@wisc.edu, 9076435016
+*/
 #ifndef MODULE_HEADER
 #define MODULE_HEADER
 #include <semaphore.h>
@@ -24,6 +28,5 @@ void EnqueueString(Queue *q, char *string);
 char * DequeueString(Queue *q);
 void PrintQueueStats(Queue *q);
 void sem_check(int sem_return_val);
-int ModIncr(int v);
 
 #endif

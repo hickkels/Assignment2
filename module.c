@@ -1,3 +1,7 @@
+/*
+Cecelia Peterson: cpeterson36@wisc.edu, 9073157274
+Kelsey Hickok: khickok@wisc.edu, 9076435016
+*/
 #include "module.h"
 #include <stdio.h>
 #include <pthread.h>
