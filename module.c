@@ -68,12 +68,16 @@ void EnqueueString(Queue *q, char *string) {
 
     printf("ENTERING ENQUEUE MUTEX\n");
     // enqueue
-    printf("%d\n", q->curr_size);
     q->strings[q->curr_size] = string;
     q->enqueueCount++;
     q->curr_size++;
-    printf("cur size = \n", q->curr_size);    
+    
+    printf("\n");
     printf("-------enqueued: %s-------\n", string);
+    printf("curr_size = %d\n", q->curr_size);
+    printf("next_dq = %d\n", q->next_dq);
+    printf("--------------------------\n");
+    printf("\n");
 
     sem_check = sem_post(&(q->MEQueue));
     if (sem_check==-1) {
@@ -112,7 +116,13 @@ char * DequeueString(Queue *q) {
     q->strings[q->next_dq] = NULL;
     q->next_dq++;
     q->dequeueCount++;
+
+    printf("\n");
     printf("-------dequeued: %s-------\n", rem_string_ptr);
+    printf("curr_size = %d\n", q->curr_size);
+    printf("next_dq = %d\n", q->next_dq);
+    printf("--------------------------\n");
+    printf("\n");
 
     sem_check = sem_post(&(q->MEQueue));
     if (sem_check==-1) {
