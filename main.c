@@ -180,7 +180,11 @@ void* writer_function(void *queue_ptr) {
     if (!write) pthread_join(Writer, NULL);
  
     // for each queue, print statistics to stderr uding PrintQueueStats function
-    printf("Queue statistics: \n");
+    printf("Reader to Munch1 statistics: \n");
+    PrintQueueStats(reader_to_munch1);
+    printf("Munch1 to Munch2 statistics: \n");
+    PrintQueueStats(munch1_to_munch2);
+    printf("Munch2 to Writer statistics: \n");
     PrintQueueStats(munch2_to_writer);
     pthread_exit(0);
 }

@@ -18,8 +18,8 @@ typedef struct Queue
     sem_t OKToEnqueue;
     sem_t OKToDequeue;
     sem_t MEQueue;
-    float enqueueTime;
-    float dequeueTime;
+    double enqueueTime;
+    double dequeueTime;
     char **strings;
 } Queue;
 

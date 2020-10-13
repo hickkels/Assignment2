@@ -47,8 +47,8 @@ Queue *CreateStringQueue(int size, int max_buff){
     q->next_dq = 0;
     q->enqueueCount = -1;
     q->dequeueCount = -1;
-    q->enqueueTime = 0;
-    q->dequeueTime = 0;
+//    q->enqueueTime = 0;
+//    q->dequeueTime = 0;
     q->size = size;
 
     // return the queue and its respective fields
@@ -64,7 +64,7 @@ void EnqueueString(Queue *q, char *string) {
     struct timeval startEnq, endEnq;  
    
     // start measuring time 
-    gettimeofday(&startEnq, 0);
+    gettimeofday(&startEnq, NULL);
     
     sem_check( sem_wait(&(q->OKToEnqueue)) );
     sem_check( sem_wait(&(q->MEQueue)) );
@@ -78,7 +78,7 @@ void EnqueueString(Queue *q, char *string) {
     sem_check( sem_post(&(q->OKToDequeue)) );
 
     // stop measuring time
-    gettimeofday(&endEnq, 0);
+    gettimeofday(&endEnq, NULL);
     long secondsEnq = endEnq.tv_sec - startEnq.tv_sec;
     long microsecondsEnq = endEnq.tv_usec - startEnq.tv_usec;
     q->enqueueTime = secondsEnq + microsecondsEnq*1e-6;
@@ -94,7 +94,7 @@ char * DequeueString(Queue *q) {
     struct timeval startDeq, endDeq;
 
     // start measuring time
-    gettimeofday(&startDeq, 0);
+    gettimeofday(&startDeq, NULL);
 
     sem_check( sem_wait(&(q->OKToDequeue)) );
     sem_check( sem_wait(&(q->MEQueue)) );    
@@ -109,7 +109,7 @@ char * DequeueString(Queue *q) {
     sem_check( sem_post(&(q->OKToEnqueue)) ); 
 
     // stop measuring time
-    gettimeofday(&endDeq, 0);
+    gettimeofday(&endDeq, NULL);
     long secondsDeq = endDeq.tv_sec - startDeq.tv_sec;
     long microsecondsDeq = endDeq.tv_usec - startDeq.tv_usec;
     q->dequeueTime = secondsDeq + microsecondsDeq*1e-6;
