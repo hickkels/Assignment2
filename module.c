@@ -41,8 +41,8 @@ Queue *CreateStringQueue(int size, int max_buff){
     // state vars used in the structure
     q->curr_size = 0;
     q->next_dq = 0;
-    q->enqueueCount = 0;
-    q->dequeueCount = 0;
+    q->enqueueCount = -1;
+    q->dequeueCount = -1;
     q->enqueueTime = 0;
     q->dequeueTime = 0;
     q->size = size;

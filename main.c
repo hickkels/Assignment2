@@ -52,7 +52,7 @@ void* reader_function(void *queue_ptr) {
     	ch = (char) fgetc(stdin);
         len = 0;
 	characters = 0;
-    string = NULL;
+        string = NULL;
     }
     EnqueueString(reader_to_munch1, NULL);
     pthread_exit(0);
