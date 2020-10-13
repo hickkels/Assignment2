@@ -70,12 +70,7 @@ void EnqueueString(Queue *q, char *string) {
     }
 
     // enqueue
-<<<<<<< HEAD
-    q->strings[0] = &string;
-    //*((q->strings)+(q->curr_size)) = string;
-=======
     q->strings[q->curr_size] = string;
->>>>>>> b56164a4dfe069d3d919729acfee4d93740610af
     q->enqueueCount++;
     q->curr_size++;    
 

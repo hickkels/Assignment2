@@ -194,7 +194,6 @@ void* writer_function(void *queue_ptr) {
  
     // then create 4 pthreads using pthread_create 
     int read = pthread_create(&Reader, NULL, &reader_function, (void *)(reader_to_munch1));
-    //int munch1 = pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
     int munch1 = pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
     //int munch2 = pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
     //int write = pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
