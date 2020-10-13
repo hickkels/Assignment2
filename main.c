@@ -132,25 +132,19 @@ void* munch2_function(void *m2_args) {
 
 /* Write line to standard output */
 void* writer_function(void *queue_ptr) {
-    printf("entered writer function\n");
-    // when no more string to process, print queue statistics
-    // print each string
 
     // initialize queue used in writer
     Queue *munch2_to_writer = (Queue *) queue_ptr;
 
     // initialize other variables used in munch
     char *outString;
-    int count = 0;
-
-    printf("Output: \n");
     
     // while the queue size is not exceeded
-    while (munch2_to_writer->curr_size >= count)
+    while (munch2_to_writer->next_dq <= munch2_to_writer->curr_size)
     {
         outString = DequeueString(munch2_to_writer); // take out string and remove from queue
+	if (NULL==outString) break;
         printf("%s\n", outString); // print string
-        count++; // increment counter for queue size
     }
     pthread_exit(0);
 }
@@ -187,14 +181,14 @@ void* writer_function(void *queue_ptr) {
     int read = pthread_create(&Reader, NULL, &reader_function, (void *)(reader_to_munch1));
     int munch1 = pthread_create(&Munch1, NULL, &munch1_function, (void *)(&m1_args));
     int munch2 = pthread_create(&Munch2, NULL, &munch2_function, (void *)(&m2_args));
-    //int write = pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
+    int write = pthread_create(&Writer, NULL, &writer_function, (void *)(munch2_to_writer));
    
     // wait for these threads to finish by calling pthread_join
     if (!read) pthread_join(Reader, NULL);
     if (!munch1) pthread_join(Munch1, NULL);
     if (!munch2) pthread_join(Munch2, NULL);
-    //if (!write) pthread_join(Writer, NULL);
-  
+    if (!write) pthread_join(Writer, NULL);
+ 
     // for each queue, print statistics to stderr uding PrintQueueStats function
     printf("Queue statistics: \n");
     PrintQueueStats(munch2_to_writer);
