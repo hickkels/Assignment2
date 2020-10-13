@@ -15,7 +15,6 @@
 */
 Queue *CreateStringQueue(int size){
 
-    printf("In create string queue\n");
     // malloc queue struct 
     Queue *q;
     q = malloc(sizeof(Queue));
@@ -39,6 +38,8 @@ Queue *CreateStringQueue(int size){
     
     // state vars used in the structure
     q->curr_size = 0;
+    q->enqueueCount = 0;
+    q->dequeueCount = 0;
 
     return q;
 }
@@ -49,29 +50,26 @@ Queue *CreateStringQueue(int size){
 */
 void EnqueueString(Queue *q, char *string) {
    
-    printf("ENTERED ENQUEUE\n");
     // SHOULD THIS start before or after the wait?
     time_t start_enqueue = time(NULL);
-
-    printf("after time\n");  
   
     int sem_check; 
     sem_check = sem_wait(&(q->OKToEnqueue));
-    printf("a\n");
     if (sem_check==-1) {
         printf("Error waiting to OKToEnqueue\n");
     }
-    printf("before MEQ\n");
     sem_check = sem_wait(&(q->MEQueue));
-    printf("after MEQ\n");
     if (sem_check==-1) {
 	printf("Error waiting to MEQueue\n");
     }
 
+    printf("ENTERING ENQUEUE MUTEX\n");
     // enqueue
     q->strings[q->curr_size] = string;
     q->enqueueCount++;
-    q->curr_size++;    
+    q->curr_size++;
+    printf("cur size = \n", q->curr_size);    
+    printf("-------enqueued: %s-------\n", string);
 
     sem_check = sem_post(&(q->MEQueue));
     if (sem_check==-1) {
@@ -81,8 +79,6 @@ void EnqueueString(Queue *q, char *string) {
     if (sem_check==-1) {
 	printf("Error posting to OKToDequeue\n");
     }
-
-    printf("STRING ADDED: %s\n", string);
 
     time_t end_enqueue = time(NULL);
     q->enqueueTime = (long int) (end_enqueue - start_enqueue);
@@ -94,7 +90,6 @@ void EnqueueString(Queue *q, char *string) {
 * Returns the pointer that was removed from the queue
 */
 char * DequeueString(Queue *q) {
-    printf("ENTERED DEQUEUE\n");
     time_t start_dequeue = time(NULL);
 
     int sem_check;
@@ -107,12 +102,13 @@ char * DequeueString(Queue *q) {
         printf("Error waiting to MEQueue\n");
     }
 
+    printf("ENTERING DEQUEUE MUTEX\n");
     // removes a pointer to a string from the beginning of queue q
-    char *rem_string_ptr = *((q->strings)+(q->curr_size));
-    *((q->strings)+(q->curr_size)) = NULL;
+    char *rem_string_ptr = q->strings[q->curr_size];
+    q->strings[q->curr_size] = NULL;
     q->curr_size--;
     q->dequeueCount++;
-    printf("Dequeued a string\n");
+    printf("-------dequeued: %s-------\n", rem_string_ptr);
 
     sem_check = sem_post(&(q->MEQueue));
     if (sem_check==-1) {
